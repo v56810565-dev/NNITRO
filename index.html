@@ -86,4 +86,73 @@
         let currentGroup = 'channel';
         let chatRef = null;
 
-        const vTag = '<svg class="verify" viewBox="0 0 24
+        const vTag = '<svg class="verify" viewBox="0 0 24 24" fill="currentColor"><path d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.79L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"></path></svg>';
+
+        function auth() {
+            if(document.getElementById('p').value === 'NNITRO-2026') {
+                document.getElementById('gate').style.display = 'none';
+                if(!user) document.getElementById('nick-gate').style.display = 'flex';
+                else start();
+            } else { alert("Неверный код доступа!"); }
+        }
+
+        function reg() {
+            let val = document.getElementById('n').value;
+            if(val.trim().length > 1) {
+                localStorage.setItem('nn_name', val);
+                user = val;
+                document.getElementById('nick-gate').style.display = 'none';
+                start();
+            }
+        }
+
+        function switchGroup(groupName, el) {
+            currentGroup = groupName;
+            document.querySelectorAll('.group-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            
+            const isAdm = user.includes('VAaD');
+            if(groupName === 'channel' && !isAdm) {
+                document.getElementById('input-bar').style.display = 'none';
+                document.getElementById('locked').style.display = 'block';
+            } else {
+                document.getElementById('input-bar').style.display = 'flex';
+                document.getElementById('locked').style.display = 'none';
+            }
+            start();
+        }
+
+        function start() {
+            const area = document.getElementById("messages");
+            if(chatRef) chatRef.off();
+            chatRef = db.ref("rooms/" + currentGroup).limitToLast(100);
+            chatRef.on("value", (snap) => {
+                area.innerHTML = "";
+                snap.forEach((child) => {
+                    const d = child.val();
+                    const hasV = d.u.includes('VAaD') ? vTag : "";
+                    const div = document.createElement("div");
+                    div.className = `m ${d.u === user ? 'my' : 'other'}`;
+                    div.innerHTML = `<div class="sender">${d.u}${hasV}</div>${d.t}<div class="time">${d.h || ''}</div>`;
+                    area.appendChild(div);
+                });
+                area.scrollTop = area.scrollHeight;
+            });
+            switchGroup(currentGroup, document.querySelector('.group-item.active'));
+        }
+
+        function send() {
+            let input = document.getElementById("msgInput");
+            if(input.value.trim()) {
+                let now = new Date();
+                db.ref("rooms/" + currentGroup).push({
+                    u: user,
+                    t: input.value,
+                    h: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
+                });
+                input.value = "";
+            }
+        }
+    </script>
+</body>
+</html>
