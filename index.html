@@ -3,72 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NNITRO SYSTEM 2026</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <title>NNITRO Messenger</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        :root { --bg: #0e1621; --side: #17212b; --msg: #182533; --accent: #2b5278; --text: #ffffff; }
-        body { margin: 0; font-family: sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
-        .sidebar { width: 280px; background: var(--side); border-right: 1px solid #000; display: flex; flex-direction: column; }
-        .header { padding: 20px; font-weight: bold; background: var(--accent); text-align: center; }
-        .chat-area { flex: 1; display: flex; flex-direction: column; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: #080c11; }
-        .bubble { max-width: 75%; padding: 10px 15px; border-radius: 12px; font-size: 14px; position: relative; }
-        .in { align-self: flex-start; background: var(--msg); }
-        .out { align-self: flex-end; background: var(--accent); }
-        .input-zone { padding: 15px; background: var(--side); display: flex; gap: 10px; }
-        input { flex: 1; background: var(--bg); border: 1px solid #333; padding: 12px; border-radius: 8px; color: #fff; outline: none; }
-        button { background: #5288c1; border: none; color: #fff; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+        body { background: #0e1621; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        /* Окно входа */
+        #auth-gate, #nick-gate { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #17212b; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        input { padding: 12px; border-radius: 8px; border: 1px solid #2f3942; background: #1d2733; color: #fff; width: 250px; text-align: center; margin-bottom: 15px; outline: none; }
+        button { padding: 12px 24px; background: #2481cc; border: none; border-radius: 8px; color: #fff; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2895e7; }
+        
+        /* Чат интерфейс */
+        #header { background: #17212b; padding: 15px; font-weight: bold; border-bottom: 1px solid #0e1621; display: flex; justify-content: space-between; align-items: center; }
+        #chat-window { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-size: cover; }
+        .msg { max-width: 80%; padding: 8px 15px; border-radius: 12px; font-size: 15px; position: relative; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .msg.my { align-self: flex-end; background: #2b5278; color: #fff; border-bottom-right-radius: 2px; }
+        .msg.other { align-self: flex-start; background: #182533; color: #fff; border-bottom-left-radius: 2px; }
+        .msg .sender { font-size: 12px; font-weight: bold; color: #40a7e3; margin-bottom: 4px; }
+        
+        #input-area { background: #17212b; padding: 10px; display: flex; gap: 10px; align-items: center; }
+        #messageInput { flex: 1; text-align: left; margin-bottom: 0; border-radius: 20px; }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="header">NNITRO 2026</div>
-    <div style="padding: 20px; font-size: 12px; opacity: 0.5;">Система верификации активна. Подключение защищено.</div>
-</div>
-
-<div class="chat-area">
-    <div id="messages"></div>
-    <div class="input-zone">
-        <input type="text" id="msgInput" placeholder="Введите сообщение...">
-        <button onclick="send()"> SEND </button>
+    <div id="auth-gate">
+        <h2>NNITRO ACCESS</h2>
+        <input type="password" id="passCode" placeholder="Код доступа">
+        <button onclick="checkPass()">Войти</button>
     </div>
-</div>
 
-<script>
-    const firebaseConfig = {
-        apiKey: "nnitro-system.firebaseapp.com",
-        databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com",
-        projectId: "1:927836043640:web:d9b320347c888b1d1f708d"
-    };
+    <div id="nick-gate" style="display:none;">
+        <h2>Ваше имя в NNITRO</h2>
+        <input type="text" id="userName" placeholder="Введите никнейм...">
+        <button onclick="saveNick()">Начать общение</button>
+    </div>
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    <div id="header">
+        <span>NNITRO Chat</span>
+        <span id="display-name" style="font-size: 12px; color: #aaa;"></span>
+    </div>
 
-    // СИСТЕМА ВЕРИФИКАЦИИ NNITRO-2026
-    let myNick = localStorage.getItem('nn_nick');
-    let verified = localStorage.getItem('nn_verified');
+    <div id="chat-window"></div>
 
-    if (!verified) {
-        let code = prompt("ВВЕДИТЕ КОД ВЕРИФИКАЦИИ NNITRO:");
-        if (code === "NNITRO-2026") {
-            localStorage.setItem('nn_verified', 'true');
-            myNick = prompt("ПРИДУМАЙТЕ НИК:");
-            localStorage.setItem('nn_nick', myNick);
-        } else {
-            alert("ОТКАЗАНО В ДОСТУПЕ");
-            window.location.reload();
+    <div id="input-area">
+        <input type="text" id="messageInput" placeholder="Написать сообщение...">
+        <button onclick="sendMessage()">➤</button>
+    </div>
+
+    <script>
+        // ТВОЙ КОНФИГ FIREBASE (Вставь свои данные здесь!)
+        const firebaseConfig = {
+            apiKey: "ТВОЙ_КЛЮЧ",
+            authDomain: "ТВОЙ_ПРОЕКТ.firebaseapp.com",
+            databaseURL: "ТВОЙ_URL_БАЗЫ",
+            projectId: "ТВОЙ_ID",
+            storageBucket: "ТВОЙ_ПРОЕКТ.appspot.com",
+            messagingSenderId: "ID",
+            appId: "APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let myName = localStorage.getItem('nnitro_nick');
+
+        function checkPass() {
+            if(document.getElementById('passCode').value === 'NNITRO-2026') {
+                document.getElementById('auth-gate').style.display = 'none';
+                if(!myName) {
+                    document.getElementById('nick-gate').style.display = 'flex';
+                } else {
+                    initChat();
+                }
+            } else { alert('Неверный код!'); }
         }
-    }
 
-    // Прием сообщений
-    db.ref('msgs').limitToLast(50).on('child_added', s => {
-        const d = s.val();
-        const div = document.createElement('div');
-        div.className = `bubble ${d.from === myNick ? 'out' : 'in'}`;
-        div.innerHTML = `<b>${d.from}:</b><br>${d.text}`;
-        document.getElementById('messages').appendChild(div);
+        function saveNick() {
+            const nick = document.getElementById('userName').value;
+            if(nick.length > 1) {
+                localStorage.setItem('nnitro_nick', nick);
+                myName = nick;
+                document.getElementById('nick-gate').style.display = 'none';
+                initChat();
+            }
+        }
 
-        document.getElementById('messages').scrollTop = 99999
+        function initChat() {
+            document.getElementById('display-name').innerText = myName;
+            db.ref("messages").on("child_added", (snapshot) => {
+                const data = snapshot.val();
+                const div = document.createElement("div");
+                div.classList.add("msg", data.name === myName ? "my" : "other");
+                div.innerHTML = `<div class="sender">${data.name}</div>${data.text}`;
+                document.getElementById("chat-window").appendChild(div);
+                document.getElementById("chat-window").scrollTop = document.getElementById("chat-window").scrollHeight;
+            });
+        }
 
+        function sendMessage() {
+            const text = document.getElementById("messageInput").value;
+            if(text.trim()) {
+                db.ref("messages").push({ name: myName, text: text });
+                document.getElementById("messageInput").value = "";
+            }
+        }
+    </script>
+</body>
+</html>
