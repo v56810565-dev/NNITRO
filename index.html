@@ -3,154 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NNITRO Messenger PRO</title>
+    <title>NNITRO OS</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        :root { --bg: #0e1621; --side: #17212b; --msg-in: #182533; --msg-out: #2b5278; --accent: #2481cc; }
-        body { background: var(--bg); color: #fff; font-family: -apple-system, system-ui, sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        :root {
+            --rainbow: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            --dark: #121212;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+        body { 
+            margin: 0; font-family: 'Segoe UI', sans-serif; height: 100vh; 
+            background: #000; color: white; display: flex; 
+        }
         
-        /* Заставки */
-        .overlay { position: fixed; inset: 0; background: var(--side); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; text-align: center; }
-        input { padding: 12px; border-radius: 8px; border: 1px solid #2f3942; background: #1d2733; color: #fff; width: 260px; margin-bottom: 15px; outline: none; }
-        button { padding: 10px 25px; background: var(--accent); border: none; border-radius: 8px; color: #fff; cursor: pointer; font-weight: bold; }
+        /* Радужный фон */
+        #app-bg {
+            position: fixed; inset: 0; z-index: -1;
+            background: var(--rainbow); background-size: 400%;
+            animation: move 20s linear infinite; opacity: 0.15; filter: blur(50px);
+        }
+        @keyframes move { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
 
-        /* Боковая панель */
-        #sidebar { width: 280px; background: var(--side); border-right: 1px solid #080d13; display: flex; flex-direction: column; }
-        .group-item { padding: 15px; border-bottom: 1px solid #0e1621; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: space-between; }
-        .group-item:hover { background: #232e3a; }
-        .group-item.active { background: var(--accent); }
-        .badge-admin { background: #ff4b4b; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        /* Вход и Профиль */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
+        .win { background: #1e1e1e; padding: 30px; border-radius: 20px; border: 1px solid #333; width: 300px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #0078d4; border: none; color: #fff; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        /* Чат */
-        #chat-main { flex: 1; display: flex; flex-direction: column; background: #0e1621; }
+        /* Интерфейс */
+        #sidebar { width: 300px; background: rgba(20,20,20,0.8); border-right: 1px solid #333; display: flex; flex-direction: column; }
+        #chat-main { flex: 1; display: flex; flex-direction: column; }
+        
+        .user-card { padding: 15px; border-bottom: 1px solid #333; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .avatar { font-size: 24px; background: #333; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        
         #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 70%; padding: 12px; border-radius: 15px; background: #262626; position: relative; }
+        .msg.my { align-self: flex-end; background: #005a9e; }
+        .msg .sender { font-size: 11px; color: #aaa; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
         
-        .m { max-width: 80%; padding: 10px 15px; border-radius: 12px; font-size: 14px; position: relative; }
-        .m.my { align-self: flex-end; background: var(--msg-out); border-bottom-right-radius: 2px; }
-        .m.other { align-self: flex-start; background: var(--msg-in); border-bottom-left-radius: 2px; }
-        
-        .sender { font-size: 11px; font-weight: bold; color: #40a7e3; display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
-        .verify { color: #33a1f2; width: 14px; height: 14px; }
-        .time { font-size: 10px; opacity: 0.5; text-align: right; margin-top: 5px; }
+        #admin-panel { padding: 10px; background: #000; font-size: 12px; color: #0f0; border-bottom: 1px solid #0f0; display: none; }
 
-        #input-bar { background: var(--side); padding: 15px; display: flex; gap: 10px; border-top: 1px solid #080d13; }
-        #msgInput { flex: 1; margin: 0; border-radius: 20px; background: #1d2733; text-align: left; }
-        #locked { display: none; background: #17212b; color: #777; text-align: center; padding: 18px; font-size: 13px; }
+        .verify { color: #00a2ff; width: 14px; }
     </style>
 </head>
 <body>
+    <div id="app-bg"></div>
 
     <div id="gate" class="overlay">
-        <h2>NNITRO ACCESS</h2>
-        <input type="password" id="p" placeholder="Код доступа">
-        <button onclick="auth()">Войти</button>
+        <div class="win">
+            <h2>NNITRO OS</h2>
+            <input type="password" id="sys_pass" placeholder="Код системы">
+            <button onclick="checkSys()">Доступ</button>
+        </div>
     </div>
 
-    <div id="nick-gate" class="overlay" style="display:none">
-        <h2>Регистрация в системе</h2>
-        <input type="text" id="n" placeholder="Никнейм (Админ: VAaD)">
-        <button onclick="reg()">Начать</button>
+    <div id="auth-gate" class="overlay" style="display:none">
+        <div class="win">
+            <h3 id="auth-title">Вход в Аккаунт</h3>
+            <input type="text" id="u_name" placeholder="Никнейм">
+            <input type="password" id="u_pass" placeholder="Личный пароль">
+            <input type="text" id="u_emoji" placeholder="Твой эмодзи (напр. 😎)" maxlength="2">
+            <input type="text" id="u_desc" placeholder="Описание (Привет, я...)">
+            <button onclick="accountAction()">Войти / Создать</button>
+        </div>
     </div>
 
     <div id="sidebar">
-        <div style="padding: 22px; font-weight: bold; font-size: 20px; color: var(--accent);">NNITRO SYSTEM</div>
-        <div class="group-item active" onclick="switchGroup('channel', this)">📢 Канал Новостей <span class="badge-admin">READ ONLY</span></div>
-        <div class="group-item" onclick="switchGroup('general', this)">👥 Общий чат</div>
-        <div class="group-item" onclick="switchGroup('secret', this)">🤫 Секретный сектор</div>
+        <div id="admin-panel">ADMIN: <span id="user-count">0</span> юзеров онлайн</div>
+        <div style="padding: 20px; font-weight: bold; border-bottom: 1px solid #333;">Чаты и Люди</div>
+        <div id="user-list"></div>
     </div>
 
     <div id="chat-main">
         <div id="messages"></div>
-        <div id="locked">Только администратор (VAaD) может писать здесь.</div>
-        <div id="input-bar">
-            <input type="text" id="msgInput" placeholder="Сообщение..." onkeypress="if(event.key==='Enter')send()">
-            <button onclick="send()">➤</button>
+        <div style="padding: 15px; display: flex; gap: 10px; background: rgba(0,0,0,0.5);">
+            <input type="text" id="m_input" placeholder="Сообщение..." onkeypress="if(event.key==='Enter')send()">
+            <button style="width: 60px;" onclick="send()">➤</button>
         </div>
     </div>
 
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAThHqr7jix2KbL7q9kc3JJ4_dMpn09q-o",
-            authDomain: "nnitro-system.firebaseapp.com",
             databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com",
             projectId: "nnitro-system",
-            storageBucket: "nnitro-system.firebasestorage.app",
-            messagingSenderId: "927836043640",
             appId: "1:927836043640:web:d9b320347c888b1d1f708d"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        let user = localStorage.getItem('nn_name') || "";
-        let currentGroup = 'channel';
-        let chatRef = null;
+        
+        let myNick = localStorage.getItem('nn_nick');
+        let myData = null;
 
-        const vTag = '<svg class="verify" viewBox="0 0 24 24" fill="currentColor"><path d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.79L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"></path></svg>';
-
-        function auth() {
-            if(document.getElementById('p').value === 'NNITRO-2026') {
+        function checkSys() {
+            if(document.getElementById('sys_pass').value === 'NNITRO-2026') {
                 document.getElementById('gate').style.display = 'none';
-                if(!user) document.getElementById('nick-gate').style.display = 'flex';
-                else start();
-            } else { alert("Неверный код доступа!"); }
-        }
-
-        function reg() {
-            let val = document.getElementById('n').value;
-            if(val.trim().length > 1) {
-                localStorage.setItem('nn_name', val);
-                user = val;
-                document.getElementById('nick-gate').style.display = 'none';
-                start();
+                document.getElementById('auth-gate').style.display = 'flex';
             }
         }
 
-        function switchGroup(groupName, el) {
-            currentGroup = groupName;
-            document.querySelectorAll('.group-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-            
-            const isAdm = user.includes('VAaD');
-            if(groupName === 'channel' && !isAdm) {
-                document.getElementById('input-bar').style.display = 'none';
-                document.getElementById('locked').style.display = 'block';
+        async function accountAction() {
+            const nick = document.getElementById('u_name').value.trim();
+            const pass = document.getElementById('u_pass').value;
+            const emoji = document.getElementById('u_emoji').value || "👤";
+            const desc = document.getElementById('u_desc').value || "Пользуюсь NNITRO";
+
+            if(!nick || !pass) return alert("Заполни поля!");
+
+            const snap = await db.ref('users/' + nick).once('value');
+            const exist = snap.val();
+
+            if(exist) {
+                if(exist.pass !== pass) return alert("Неверный личный пароль!");
+                myData = exist;
             } else {
-                document.getElementById('input-bar').style.display = 'flex';
-                document.getElementById('locked').style.display = 'none';
+                myData = { nick, pass, emoji, desc, isAdmin: nick.includes('VAaD') };
+                await db.ref('users/' + nick).set(myData);
             }
-            start();
+
+            localStorage.setItem('nn_nick', nick);
+            myNick = nick;
+            document.getElementById('auth-gate').style.display = 'none';
+            initApp();
         }
 
-        function start() {
-            const area = document.getElementById("messages");
-            if(chatRef) chatRef.off();
-            chatRef = db.ref("rooms/" + currentGroup).limitToLast(100);
-            chatRef.on("value", (snap) => {
+        function initApp() {
+            // Админка
+            if(myNick.includes('VAaD')) {
+                document.getElementById('admin-panel').style.display = 'block';
+                db.ref('users').on('value', s => {
+                    document.getElementById('user-count').innerText = Object.keys(s.val() || {}).length;
+                });
+            }
+
+            // Список пользователей
+            db.ref('users').on('value', snap => {
+                const list = document.getElementById('user-list');
+                list.innerHTML = "";
+                snap.forEach(u => {
+                    const d = u.val();
+                    list.innerHTML += `
+                        <div class="user-card" onclick="alert('Профиль: ${d.desc}')">
+                            <div class="avatar">${d.emoji}</div>
+                            <div>
+                                <b>${d.nick} ${d.nick.includes('VAaD') ? '💎' : ''}</b><br>
+                                <small style="color: #666">${d.desc}</small>
+                            </div>
+                        </div>`;
+                });
+            });
+
+            // Чат
+            db.ref('main_chat').limitToLast(50).on('value', snap => {
+                const area = document.getElementById('messages');
                 area.innerHTML = "";
-                snap.forEach((child) => {
-                    const d = child.val();
-                    const hasV = d.u.includes('VAaD') ? vTag : "";
-                    const div = document.createElement("div");
-                    div.className = `m ${d.u === user ? 'my' : 'other'}`;
-                    div.innerHTML = `<div class="sender">${d.u}${hasV}</div>${d.t}<div class="time">${d.h || ''}</div>`;
-                    area.appendChild(div);
+                snap.forEach(m => {
+                    const d = m.val();
+                    const isMy = d.u === myNick;
+                    area.innerHTML += `
+                        <div class="msg ${isMy ? 'my' : ''}">
+                            <div class="sender">${d.e} ${d.u}</div>
+                            ${d.t}
+                        </div>`;
                 });
                 area.scrollTop = area.scrollHeight;
             });
-            switchGroup(currentGroup, document.querySelector('.group-item.active'));
         }
 
         function send() {
-            let input = document.getElementById("msgInput");
-            if(input.value.trim()) {
-                let now = new Date();
-                db.ref("rooms/" + currentGroup).push({
-                    u: user,
-                    t: input.value,
-                    h: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
-                });
-                input.value = "";
+            const t = document.getElementById('m_input').value;
+            if(t.trim()) {
+                db.ref('main_chat').push({ u: myNick, t: t, e: myData.emoji });
+                document.getElementById('m_input').value = "";
             }
         }
     </script>
