@@ -3,103 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NNITRO V6</title>
+    <title>NNITRO V23 | VAaD EDITION</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { background: #000; color: #fff; font-family: sans-serif; height: 100vh; overflow: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        body { background: #000; color: #fff; font-family: 'Consolas', monospace; height: 100vh; overflow: hidden; }
         
-        /* Вход */
         #auth { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
-        .card { background: #0a0a0a; padding: 25px; border: 1px solid #222; border-radius: 20px; width: 90%; max-width: 340px; }
-        input { width: 100%; padding: 14px; margin: 8px 0; background: #111; border: 1px solid #333; color: #fff; border-radius: 12px; }
+        .auth-card { background: #050505; padding: 30px; border: 1px solid #1a1a1a; border-radius: 10px; width: 90%; max-width: 320px; }
+        .auth-card h2 { text-align: center; margin-bottom: 20px; color: #fffb00; font-size: 18px; letter-spacing: 2px; }
         
-        /* Списки */
+        input { width: 100%; padding: 14px; margin: 8px 0; background: #111; border: 1px solid #222; color: #fffb00; border-radius: 5px; font-family: inherit; }
+        .btn-join { width: 100%; padding: 15px; background: #fffb00; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; }
+
         #app { display: none; flex-direction: column; height: 100vh; }
-        #header { padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; background: #050505; font-size: 14px; }
-        .scroll { flex: 1; overflow-y: auto; padding: 10px; }
-        .label { padding: 10px; font-size: 11px; color: #444; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Элементы списка */
-        .item { background: #0f0f0f; padding: 15px; border-radius: 15px; margin-bottom: 8px; border: 1px solid #1a1a1a; display: flex; align-items: center; gap: 12px; }
-        .item b { flex: 1; }
-        .g-tag { background: #00ffd5; color: #000; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
-
-        /* Модалки */
-        #modal, #group-creator { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 11000; align-items: center; justify-content: center; padding: 20px; }
-        .m-content { background: #0a0a0a; border: 1px solid #333; border-radius: 20px; width: 100%; max-width: 300px; overflow: hidden; }
-        .m-btn { width: 100%; padding: 15px; border: none; border-bottom: 1px solid #1a1a1a; background: none; color: #fff; text-align: left; font-size: 16px; cursor: pointer; }
-        .adm { color: #ff4444; font-weight: bold; display: none; }
-
-        /* Чат */
-        #chat-ui { display: none; position: fixed; inset: 0; background: #000; z-index: 500; flex-direction: column; }
-        #msgs { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .m { background: #111; padding: 10px; border-radius: 12px; max-width: 80%; font-size: 14px; border: 1px solid #222; }
-        .m.my { align-self: flex-end; border-color: #00ffd5; background: #001a1a; }
-
-        .rainbow { background: linear-gradient(45deg, #f00, #fffb00, #00ffd5, #7a00ff); background-size: 400%; animation: rb 8s linear infinite; border: none; color: #fff; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; }
-        @keyframes rb { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        #header { padding: 12px 20px; border-bottom: 1px solid #111; display: flex; justify-content: space-between; font-size: 10px; color: #444; }
         
-        .sel-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #1a1a1a; }
-        .sel-item input { width: 20px; margin-right: 10px; }
+        .scroll { flex: 1; overflow-y: auto; padding: 15px; }
+        .label { padding: 15px 5px 8px; font-size: 9px; color: #333; letter-spacing: 3px; font-weight: bold; }
+
+        .item { background: #080808; padding: 12px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #111; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .emo { font-size: 20px; width: 35px; height: 35px; background: #111; display: flex; align-items: center; justify-content: center; border-radius: 4px; border: 1px solid #222; }
+        .info b { display: block; font-size: 14px; color: #bbb; }
+
+        .full { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; flex-direction: column; }
+        .chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .msg { padding: 10px 14px; border-radius: 4px; max-width: 80%; font-size: 14px; border: 1px solid #222; }
+        .msg.user { background: #fffb00; color: #000; align-self: flex-end; border: none; font-weight: 600; }
+        .msg.ai { background: #0a0a0a; color: #fff; align-self: flex-start; }
+
+        .bar { padding: 15px; background: #050505; display: flex; gap: 10px; border-top: 1px solid #111; }
     </style>
 </head>
 <body>
 
     <div id="auth">
-        <div class="card">
-            <h2 style="text-align:center; margin-bottom:15px;">NNITRO <span style="color:red">V6</span></h2>
-            <input type="text" id="nick" placeholder="НИКНЕЙМ">
-            <input type="password" id="pass" placeholder="ПАРОЛЬ">
-            <div style="display:flex; gap:5px">
-                <input type="text" id="emo" placeholder="👤" maxlength="2">
-                <input type="text" id="cln" placeholder="🚩" maxlength="2">
-            </div>
-            <button class="rainbow" onclick="login()">CONNECT</button>
+        <div class="auth-card">
+            <h2>PRIVATE ACCESS</h2>
+            <input type="text" id="a-nick" placeholder="LOGIN">
+            <input type="password" id="a-pass" placeholder="PASSWORD">
+            <input type="text" id="a-code" placeholder="GLOBAL_CODE">
+            <button class="btn-join" onclick="handleAuth()">AUTHORIZE</button>
         </div>
     </div>
 
     <div id="app">
-        <div id="header"><span>CORE NETWORK</span> <span id="my-n"></span></div>
+        <div id="header"><span>ROOT_USER: <span id="my-n" style="color:#fffb00"></span></span> <span>V23_SECURE</span></div>
         <div class="scroll">
-            <div class="label">Групповые чаты (3+)</div>
-            <div id="group-list"></div>
-            <button class="rainbow" style="padding:10px; margin-top:10px; font-size:12px;" onclick="openGroupCreator()">+ СОЗДАТЬ ГРУППУ</button>
-            <div class="label" style="margin-top:20px">Личные сообщения</div>
+            <input type="text" id="search" placeholder="FIND_USER_BY_ID..." oninput="sync()" style="margin-bottom:15px; border-color:#222;">
+
+            <div class="label">TRUSTED_USERS</div>
+            <div id="trusted-list"></div>
+
+            <div class="label">ACTIVE_CHATS</div>
+            <div id="active-list"></div>
+
+            <div class="label">SEARCH_RESULTS</div>
             <div id="user-list"></div>
         </div>
     </div>
 
-    <div id="modal" onclick="closeModal()">
-        <div class="m-content" onclick="event.stopPropagation()">
-            <div id="m-title" style="padding:15px; background:#111; font-size:12px; border-bottom:1px solid #333">ДЕЙСТВИЯ</div>
-            <button class="m-btn" onclick="openPrivate()">✉️ Написать в ЛС</button>
-            <button class="m-btn" onclick="alert('Заблокирован')">🚫 Блокировать</button>
-            <button id="adm-ban" class="m-btn adm" onclick="adminOp('BAN')">💀 BAN USER</button>
-            <button id="adm-mute" class="m-btn adm" onclick="adminOp('MUTE')">🔇 MUTE USER</button>
-            <button class="m-btn" onclick="closeModal()" style="text-align:center; color:#555">Закрыть</button>
+    <div id="chat-ui" class="full">
+        <div id="header">
+            <span onclick="closeAll()" style="cursor:pointer; color:#fffb00">[ BACK ]</span>
+            <span id="chat-name"></span>
+            <span></span>
         </div>
-    </div>
-
-    <div id="group-creator">
-        <div class="m-content" style="max-width:320px">
-            <div style="padding:15px; background:#111; font-weight:bold">ВЫБЕРИ УЧАСТНИКОВ</div>
-            <div id="selector-list" style="max-height:300px; overflow-y:auto"></div>
-            <div style="padding:15px">
-                <input type="text" id="g-name-in" placeholder="Название группы" style="margin-bottom:10px">
-                <button class="rainbow" onclick="submitGroup()">СОЗДАТЬ</button>
-                <button class="m-btn" onclick="document.getElementById('group-creator').style.display='none'" style="text-align:center">Отмена</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="chat-ui">
-        <div id="header"><span onclick="closeChat()" style="cursor:pointer">← НАЗАД</span> <span id="chat-name">ЧАТ</span></div>
-        <div id="msgs"></div>
-        <div style="padding:15px; background:#0a0a0a; display:flex; gap:8px">
-            <input type="text" id="m-in" placeholder="Сообщение..." style="margin:0">
-            <button class="rainbow" style="width:60px; margin:0" onclick="send()">➤</button>
+        <div class="chat-box" id="msgs"></div>
+        <div class="bar">
+            <input type="text" id="m-in" placeholder="...">
+            <button class="btn-join" style="width:auto; margin:0; padding:0 20px;" onclick="send()">➤</button>
         </div>
     </div>
 
@@ -108,100 +82,110 @@
         firebase.initializeApp(config);
         const db = firebase.database();
 
-        let me = {}; let target = ""; let curChatId = ""; let allUsers = [];
+        let me = ""; 
+        const GLOBAL_CODE = "NNITRO-2026";
+        // Сюда вписывай ники тех, кого хочешь видеть в списке всегда
+        const TRUSTED_USERS = ["VAaD", "ZIP_SYSTEM"]; 
 
-        async function login() {
-            const n = document.getElementById('nick').value.trim();
-            const p = document.getElementById('pass').value;
+        async function handleAuth() {
+            const n = document.getElementById('a-nick').value.trim().toUpperCase();
+            const p = document.getElementById('a-pass').value.trim();
+            const c = document.getElementById('a-code').value.trim();
+
+            if(c !== GLOBAL_CODE) return alert("INVALID CODE");
+            
+            // Твой новый админский вход
+            if(n === "VAAD" && p === "777") {
+                login(n); return;
+            }
+
             if(!n || !p) return;
-            if(n.toLowerCase() === 'vaad' && p !== 'zip123') return alert("ERROR");
-            const snap = await db.ref('users/' + n).once('value');
-            if(snap.val() && snap.val().p !== p) return alert("WRONG PASS");
-            me = { n, e: document.getElementById('emo').value || "👤", c: document.getElementById('cln').value || "🚩", p };
-            db.ref('users/' + n).set(me);
-            document.getElementById('auth').style.display = 'none';
-            document.getElementById('app').style.display = 'flex';
-            document.getElementById('my-n').innerText = n;
+
+            const snap = await db.ref('profiles/' + n).once('value');
+            if(snap.exists()) {
+                if(snap.val().p === p) login(n);
+                else alert("ACCESS DENIED");
+            } else {
+                await db.ref('profiles/'+n).set({n, p, e: "👤"});
+                login(n);
+            }
+        }
+
+        function login(n) {
+            me = n;
+            document.getElementById('auth').style.display='none';
+            document.getElementById('app').style.display='flex';
+            document.getElementById('my-n').innerText = me;
             sync();
         }
 
         function sync() {
-            db.ref('users').on('value', s => {
-                allUsers = [];
+            const sVal = document.getElementById('search').value.toUpperCase();
+            db.ref('profiles').on('value', s => {
                 const uBox = document.getElementById('user-list');
-                const sBox = document.getElementById('selector-list');
-                uBox.innerHTML = ''; sBox.innerHTML = '';
+                const aBox = document.getElementById('active-list');
+                const tBox = document.getElementById('trusted-list');
+                uBox.innerHTML = ''; aBox.innerHTML = ''; tBox.innerHTML = '';
+
+                let h = JSON.parse(localStorage.getItem('nn_h_'+me)) || [];
+
                 s.forEach(u => {
                     const d = u.val();
-                    allUsers.push(d);
-                    if(d.n !== me.n) {
-                        uBox.innerHTML += `<div class="item" onclick="openMenu('${d.n}')"><span>${d.e}</span><b>${d.n}</b></div>`;
-                        sBox.innerHTML += `<div class="sel-item"><input type="checkbox" value="${d.n}"> ${d.n}</div>`;
+                    if(d.n === me && d.n !== "VAAD") return; // Свой профиль не показываем, кроме админа
+
+                    const html = `
+                        <div class="item" onclick="openChat('${d.n}', '${d.n}')">
+                            <div class="emo">${d.n === 'VAAD' ? '👑' : '👤'}</div>
+                            <div class="info"><b>${d.n}</b></div>
+                        </div>`;
+
+                    // 1. Доверенные (те, кто в списке TRUSTED)
+                    if(TRUSTED_USERS.includes(d.n)) {
+                        tBox.innerHTML += html;
+                    } 
+                    // 2. Активные чаты
+                    else if(h.includes(d.n)) {
+                        aBox.innerHTML += html;
+                    } 
+                    // 3. Поиск (все остальные)
+                    else if(sVal && d.n.includes(sVal)) {
+                        uBox.innerHTML += html;
                     }
                 });
             });
-
-            db.ref('groups').on('value', s => {
-                const gBox = document.getElementById('group-list');
-                gBox.innerHTML = '';
-                s.forEach(g => {
-                    const d = g.val();
-                    if(d.members.includes(me.n)) {
-                        gBox.innerHTML += `<div class="item" onclick="openChat('${g.key}', '${d.name}')"><span class="g-tag">GROUP</span><b>${d.name}</b></div>`;
-                    }
-                });
-            });
         }
 
-        function openMenu(name) {
-            target = name;
-            document.getElementById('modal').style.display = 'flex';
-            if(me.n.toLowerCase() === 'vaad') document.querySelectorAll('.adm').forEach(b => b.style.display = 'block');
-        }
-
-        function openPrivate() {
-            const id = [me.n, target].sort().join('_');
-            openChat(id, "ЛС: " + target);
-            closeModal();
-        }
-
-        function openGroupCreator() { document.getElementById('group-creator').style.display = 'flex'; }
-
-        function submitGroup() {
-            const name = document.getElementById('g-name-in').value || "Новая группа";
-            const selected = Array.from(document.querySelectorAll('#selector-list input:checked')).map(i => i.value);
-            if(selected.length < 2) return alert("Нужно минимум +2 человека (всего 3)");
-            selected.push(me.n);
-            const gid = "group_" + Date.now();
-            db.ref('groups/' + gid).set({ name, members: selected });
-            document.getElementById('group-creator').style.display = 'none';
-        }
-
-        function openChat(id, name) {
-            curChatId = id;
-            document.getElementById('chat-name').innerText = name;
+        function openChat(name, title) {
+            if(name === me) return; 
+            curChat = [me, name].sort().join('_');
+            document.getElementById('chat-name').innerText = title;
             document.getElementById('chat-ui').style.display = 'flex';
-            db.ref('msgs/' + id).limitToLast(50).on('value', s => {
-                const box = document.getElementById('msgs');
-                box.innerHTML = '';
+            db.ref('msgs/'+curChat).on('value', s => {
+                const b = document.getElementById('msgs'); b.innerHTML = '';
                 s.forEach(m => {
-                    const d = m.val();
-                    box.innerHTML += `<div class="m ${d.u === me.n ? 'my' : ''}"><b>${d.u}:</b><br>${d.t}</div>`;
+                    const isMy = m.val().u === me;
+                    b.innerHTML += `<div class="msg ${isMy?'user':'ai'}">${m.val().t}</div>`;
                 });
-                box.scrollTop = box.scrollHeight;
+                b.scrollTop = b.scrollHeight;
             });
         }
 
         function send() {
             const i = document.getElementById('m-in');
+            const target = document.getElementById('chat-name').innerText;
             if(!i.value.trim()) return;
-            db.ref('msgs/' + curChatId).push({ u: me.n, t: i.value });
+            
+            let h = JSON.parse(localStorage.getItem('nn_h_'+me)) || [];
+            if(!h.includes(target) && !TRUSTED_USERS.includes(target)) { 
+                h.push(target); 
+                localStorage.setItem('nn_h_'+me, JSON.stringify(h)); 
+            }
+
+            db.ref('msgs/'+curChat).push({u:me, t:i.value});
             i.value = '';
         }
 
-        function closeChat() { document.getElementById('chat-ui').style.display = 'none'; }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
-        function adminOp(t) { if(t === 'BAN') db.ref('users/' + target).remove(); closeModal(); }
+        function closeAll() { document.querySelectorAll('.full').forEach(e => e.style.display='none'); }
     </script>
 </body>
 </html>
