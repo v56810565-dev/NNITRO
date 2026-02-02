@@ -3,189 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NNITRO V23 | VAaD EDITION</title>
+    <title>NNITRO V27 | MOBILE NEON</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
-        body { background: #000; color: #fff; font-family: 'Consolas', monospace; height: 100vh; overflow: hidden; }
-        
-        #auth { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
-        .auth-card { background: #050505; padding: 30px; border: 1px solid #1a1a1a; border-radius: 10px; width: 90%; max-width: 320px; }
-        .auth-card h2 { text-align: center; margin-bottom: 20px; color: #fffb00; font-size: 18px; letter-spacing: 2px; }
-        
-        input { width: 100%; padding: 14px; margin: 8px 0; background: #111; border: 1px solid #222; color: #fffb00; border-radius: 5px; font-family: inherit; }
-        .btn-join { width: 100%; padding: 15px; background: #fffb00; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; }
+        :root {
+            --neon: #fffb00;
+            --bg: #0a0a0a;
+            --card: #141414;
+            --blue: #00e5ff;
+            --red: #ff3d00;
+        }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            height: 100vh; 
+            overflow: hidden; 
+            margin: 0;
+        }
+
+        /* AUTH SCREEN */
+        #auth { 
+            position: fixed; inset: 0; background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); 
+            z-index: 10000; display: flex; align-items: center; justify-content: center; 
+        }
+        .auth-card { 
+            background: var(--card); padding: 40px 25px; border-radius: 20px; 
+            width: 85%; max-width: 350px; border: 1px solid #222; text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .auth-card h2 { color: var(--neon); margin-bottom: 25px; font-weight: 800; letter-spacing: 2px; }
+        
+        input { 
+            width: 100%; padding: 16px; margin: 10px 0; background: #000; border: 1px solid #333; 
+            color: #fff; border-radius: 12px; font-size: 16px; transition: 0.3s;
+        }
+        input:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(255, 251, 0, 0.2); }
+        
+        .btn-main { 
+            width: 100%; padding: 18px; background: var(--neon); border: none; 
+            border-radius: 12px; font-weight: 800; font-size: 16px; margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(255, 251, 0, 0.3);
+        }
+
+        /* MAIN APP */
         #app { display: none; flex-direction: column; height: 100vh; }
-        #header { padding: 12px 20px; border-bottom: 1px solid #111; display: flex; justify-content: space-between; font-size: 10px; color: #444; }
+        .top-bar { 
+            padding: 20px; background: rgba(20,20,20,0.85); backdrop-filter: blur(10px);
+            border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center;
+        }
+        .top-bar b { color: var(--neon); font-size: 18px; }
+
+        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
+        .search-box { position: sticky; top: 0; z-index: 10; background: var(--bg); padding-bottom: 15px; }
         
-        .scroll { flex: 1; overflow-y: auto; padding: 15px; }
-        .label { padding: 15px 5px 8px; font-size: 9px; color: #333; letter-spacing: 3px; font-weight: bold; }
-
-        .item { background: #080808; padding: 12px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #111; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        .emo { font-size: 20px; width: 35px; height: 35px; background: #111; display: flex; align-items: center; justify-content: center; border-radius: 4px; border: 1px solid #222; }
-        .info b { display: block; font-size: 14px; color: #bbb; }
-
-        .full { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; flex-direction: column; }
-        .chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
-        .msg { padding: 10px 14px; border-radius: 4px; max-width: 80%; font-size: 14px; border: 1px solid #222; }
-        .msg.user { background: #fffb00; color: #000; align-self: flex-end; border: none; font-weight: 600; }
-        .msg.ai { background: #0a0a0a; color: #fff; align-self: flex-start; }
-
-        .bar { padding: 15px; background: #050505; display: flex; gap: 10px; border-top: 1px solid #111; }
-    </style>
-</head>
-<body>
-
-    <div id="auth">
-        <div class="auth-card">
-            <h2>PRIVATE ACCESS</h2>
-            <input type="text" id="a-nick" placeholder="LOGIN">
-            <input type="password" id="a-pass" placeholder="PASSWORD">
-            <input type="text" id="a-code" placeholder="GLOBAL_CODE">
-            <button class="btn-join" onclick="handleAuth()">AUTHORIZE</button>
-        </div>
-    </div>
-
-    <div id="app">
-        <div id="header"><span>ROOT_USER: <span id="my-n" style="color:#fffb00"></span></span> <span>V23_SECURE</span></div>
-        <div class="scroll">
-            <input type="text" id="search" placeholder="FIND_USER_BY_ID..." oninput="sync()" style="margin-bottom:15px; border-color:#222;">
-
-            <div class="label">TRUSTED_USERS</div>
-            <div id="trusted-list"></div>
-
-            <div class="label">ACTIVE_CHATS</div>
-            <div id="active-list"></div>
-
-            <div class="label">SEARCH_RESULTS</div>
-            <div id="user-list"></div>
-        </div>
-    </div>
-
-    <div id="chat-ui" class="full">
-        <div id="header">
-            <span onclick="closeAll()" style="cursor:pointer; color:#fffb00">[ BACK ]</span>
-            <span id="chat-name"></span>
-            <span></span>
-        </div>
-        <div class="chat-box" id="msgs"></div>
-        <div class="bar">
-            <input type="text" id="m-in" placeholder="...">
-            <button class="btn-join" style="width:auto; margin:0; padding:0 20px;" onclick="send()">➤</button>
-        </div>
-    </div>
-
-    <script>
-        const config = { databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com" };
-        firebase.initializeApp(config);
-        const db = firebase.database();
-
-        let me = ""; 
-        const GLOBAL_CODE = "NNITRO-2026";
-        // Сюда вписывай ники тех, кого хочешь видеть в списке всегда
-        const TRUSTED_USERS = ["VAaD", "ZIP_SYSTEM"]; 
-
-        async function handleAuth() {
-            const n = document.getElementById('a-nick').value.trim().toUpperCase();
-            const p = document.getElementById('a-pass').value.trim();
-            const c = document.getElementById('a-code').value.trim();
-
-            if(c !== GLOBAL_CODE) return alert("INVALID CODE");
-            
-            // Твой новый админский вход
-            if(n === "VAAD" && p === "777") {
-                login(n); return;
-            }
-
-            if(!n || !p) return;
-
-            const snap = await db.ref('profiles/' + n).once('value');
-            if(snap.exists()) {
-                if(snap.val().p === p) login(n);
-                else alert("ACCESS DENIED");
-            } else {
-                await db.ref('profiles/'+n).set({n, p, e: "👤"});
-                login(n);
-            }
-        }
-
-        function login(n) {
-            me = n;
-            document.getElementById('auth').style.display='none';
-            document.getElementById('app').style.display='flex';
-            document.getElementById('my-n').innerText = me;
-            sync();
-        }
-
-        function sync() {
-            const sVal = document.getElementById('search').value.toUpperCase();
-            db.ref('profiles').on('value', s => {
-                const uBox = document.getElementById('user-list');
-                const aBox = document.getElementById('active-list');
-                const tBox = document.getElementById('trusted-list');
-                uBox.innerHTML = ''; aBox.innerHTML = ''; tBox.innerHTML = '';
-
-                let h = JSON.parse(localStorage.getItem('nn_h_'+me)) || [];
-
-                s.forEach(u => {
-                    const d = u.val();
-                    if(d.n === me && d.n !== "VAAD") return; // Свой профиль не показываем, кроме админа
-
-                    const html = `
-                        <div class="item" onclick="openChat('${d.n}', '${d.n}')">
-                            <div class="emo">${d.n === 'VAAD' ? '👑' : '👤'}</div>
-                            <div class="info"><b>${d.n}</b></div>
-                        </div>`;
-
-                    // 1. Доверенные (те, кто в списке TRUSTED)
-                    if(TRUSTED_USERS.includes(d.n)) {
-                        tBox.innerHTML += html;
-                    } 
-                    // 2. Активные чаты
-                    else if(h.includes(d.n)) {
-                        aBox.innerHTML += html;
-                    } 
-                    // 3. Поиск (все остальные)
-                    else if(sVal && d.n.includes(sVal)) {
-                        uBox.innerHTML += html;
-                    }
-                });
-            });
-        }
-
-        function openChat(name, title) {
-            if(name === me) return; 
-            curChat = [me, name].sort().join('_');
-            document.getElementById('chat-name').innerText = title;
-            document.getElementById('chat-ui').style.display = 'flex';
-            db.ref('msgs/'+curChat).on('value', s => {
-                const b = document.getElementById('msgs'); b.innerHTML = '';
-                s.forEach(m => {
-                    const isMy = m.val().u === me;
-                    b.innerHTML += `<div class="msg ${isMy?'user':'ai'}">${m.val().t}</div>`;
-                });
-                b.scrollTop = b.scrollHeight;
-            });
-        }
-
-        function send() {
-            const i = document.getElementById('m-in');
-            const target = document.getElementById('chat-name').innerText;
-            if(!i.value.trim()) return;
-            
-            let h = JSON.parse(localStorage.getItem('nn_h_'+me)) || [];
-            if(!h.includes(target) && !TRUSTED_USERS.includes(target)) { 
-                h.push(target); 
-                localStorage.setItem('nn_h_'+me, JSON.stringify(h)); 
-            }
-
-            db.ref('msgs/'+curChat).push({u:me, t:i.value});
-            i.value = '';
-        }
-
-        function closeAll() { document.querySelectorAll('.full').forEach(e => e.style.display='none'); }
-    </script>
-</body>
-</html>
+        .label { 
+            font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; 
+            color
