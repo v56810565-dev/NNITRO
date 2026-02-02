@@ -2,177 +2,206 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NNITRO V3: CLAN WARS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NNITRO V6</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        :root { --rb: linear-gradient(45deg, #f00, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8); }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { background: #000; color: #fff; font-family: sans-serif; height: 100vh; overflow: hidden; }
         
-        /* Главный фон - всегда чёрный, но не пустой */
-        body { background: #000; color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; height: 100vh; overflow: hidden; }
+        /* Вход */
+        #auth { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .card { background: #0a0a0a; padding: 25px; border: 1px solid #222; border-radius: 20px; width: 90%; max-width: 340px; }
+        input { width: 100%; padding: 14px; margin: 8px 0; background: #111; border: 1px solid #333; color: #fff; border-radius: 12px; }
+        
+        /* Списки */
+        #app { display: none; flex-direction: column; height: 100vh; }
+        #header { padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; background: #050505; font-size: 14px; }
+        .scroll { flex: 1; overflow-y: auto; padding: 10px; }
+        .label { padding: 10px; font-size: 11px; color: #444; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Анимация радуги */
+        /* Элементы списка */
+        .item { background: #0f0f0f; padding: 15px; border-radius: 15px; margin-bottom: 8px; border: 1px solid #1a1a1a; display: flex; align-items: center; gap: 12px; }
+        .item b { flex: 1; }
+        .g-tag { background: #00ffd5; color: #000; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+
+        /* Модалки */
+        #modal, #group-creator { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 11000; align-items: center; justify-content: center; padding: 20px; }
+        .m-content { background: #0a0a0a; border: 1px solid #333; border-radius: 20px; width: 100%; max-width: 300px; overflow: hidden; }
+        .m-btn { width: 100%; padding: 15px; border: none; border-bottom: 1px solid #1a1a1a; background: none; color: #fff; text-align: left; font-size: 16px; cursor: pointer; }
+        .adm { color: #ff4444; font-weight: bold; display: none; }
+
+        /* Чат */
+        #chat-ui { display: none; position: fixed; inset: 0; background: #000; z-index: 500; flex-direction: column; }
+        #msgs { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .m { background: #111; padding: 10px; border-radius: 12px; max-width: 80%; font-size: 14px; border: 1px solid #222; }
+        .m.my { align-self: flex-end; border-color: #00ffd5; background: #001a1a; }
+
+        .rainbow { background: linear-gradient(45deg, #f00, #fffb00, #00ffd5, #7a00ff); background-size: 400%; animation: rb 8s linear infinite; border: none; color: #fff; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; }
         @keyframes rb { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
-        .rainbow { background: var(--rb); background-size: 400% 400%; animation: rb 8s linear infinite; border: none; color: #fff; cursor: pointer; font-weight: bold; }
-
-        /* ЭКРАН ВХОДА */
-        #auth-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; visibility: visible; }
-        .login-card { background: #0f0f0f; padding: 30px; border-radius: 20px; border: 1px solid #222; width: 350px; text-align: center; box-shadow: 0 0 20px rgba(255,0,0,0.1); }
         
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 10px; outline: none; }
-        
-        /* ОСНОВНОЙ ИНТЕРФЕЙС */
-        #app { display: none; height: 100vh; width: 100%; }
-        #sidebar { width: 320px; background: #0a0a0a; border-right: 1px solid #1a1a1a; display: flex; flex-direction: column; padding: 20px; }
-        
-        /* КЛАНЫ */
-        .clan-box { background: #111; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #222; cursor: pointer; position: relative; }
-        .clan-box:hover { border-color: #444; }
-        .badge { position: absolute; right: 10px; top: 10px; background: #00ffd5; color: #000; font-size: 10px; padding: 2px 6px; border-radius: 5px; font-weight: bold; }
-
-        /* ЧАТ */
-        #chat { flex: 1; display: flex; flex-direction: column; background: #000; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .m { padding: 10px 15px; border-radius: 15px; background: #111; max-width: 80%; border-bottom-left-radius: 2px; position: relative; }
-        .m.my { align-self: flex-end; background: #002bff; border-bottom-left-radius: 15px; border-bottom-right-radius: 2px; }
-        
-        #vaad-admin { display: none; color: #ff0000; text-align: center; border: 1px solid red; padding: 5px; margin-bottom: 15px; font-size: 12px; border-radius: 5px; }
+        .sel-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #1a1a1a; }
+        .sel-item input { width: 20px; margin-right: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="auth-overlay">
-        <div class="login-card">
-            <h2 style="margin-bottom: 20px;">NNITRO <span style="color:red">V3.5</span></h2>
-            <input type="password" id="pass" placeholder="КЛЮЧ ДОСТУПА">
-            <input type="text" id="nick" placeholder="ТВОЙ НИК">
-            <div style="display:flex; gap:10px">
-                <input type="text" id="emoji" placeholder="👤" maxlength="2">
-                <input type="text" id="clan-emoji" placeholder="🚩 КЛАН" maxlength="2">
+    <div id="auth">
+        <div class="card">
+            <h2 style="text-align:center; margin-bottom:15px;">NNITRO <span style="color:red">V6</span></h2>
+            <input type="text" id="nick" placeholder="НИКНЕЙМ">
+            <input type="password" id="pass" placeholder="ПАРОЛЬ">
+            <div style="display:flex; gap:5px">
+                <input type="text" id="emo" placeholder="👤" maxlength="2">
+                <input type="text" id="cln" placeholder="🚩" maxlength="2">
             </div>
-            <button class="rainbow" style="width:100%; padding:15px; border-radius:10px; margin-top:10px;" onclick="connect()">ВОЙТИ В СЕТЬ</button>
+            <button class="rainbow" onclick="login()">CONNECT</button>
         </div>
     </div>
 
     <div id="app">
-        <div id="sidebar">
-            <div id="vaad-admin">SYSTEM BY VAaD [ROOT]</div>
-            
-            <p style="font-size: 11px; color: #444; margin-bottom: 10px;">ПОПУЛЯРНЫЕ КЛАНЫ:</p>
-            <div id="clan-list" style="flex: 1; overflow-y: auto;">
-                </div>
-
-            <div id="me-info" style="margin-top: 20px; padding: 10px; background: #111; border-radius: 10px; border-left: 4px solid red;">
-                </div>
+        <div id="header"><span>CORE NETWORK</span> <span id="my-n"></span></div>
+        <div class="scroll">
+            <div class="label">Групповые чаты (3+)</div>
+            <div id="group-list"></div>
+            <button class="rainbow" style="padding:10px; margin-top:10px; font-size:12px;" onclick="openGroupCreator()">+ СОЗДАТЬ ГРУППУ</button>
+            <div class="label" style="margin-top:20px">Личные сообщения</div>
+            <div id="user-list"></div>
         </div>
+    </div>
 
-        <div id="chat">
-            <div id="messages"></div>
-            <div style="padding: 20px; background: #0a0a0a; display: flex; gap: 10px;">
-                <input type="text" id="msg-in" placeholder="Напиши что-нибудь..." style="margin:0">
-                <button class="rainbow" onclick="send()" style="width: 60px; border-radius: 10px;">➤</button>
+    <div id="modal" onclick="closeModal()">
+        <div class="m-content" onclick="event.stopPropagation()">
+            <div id="m-title" style="padding:15px; background:#111; font-size:12px; border-bottom:1px solid #333">ДЕЙСТВИЯ</div>
+            <button class="m-btn" onclick="openPrivate()">✉️ Написать в ЛС</button>
+            <button class="m-btn" onclick="alert('Заблокирован')">🚫 Блокировать</button>
+            <button id="adm-ban" class="m-btn adm" onclick="adminOp('BAN')">💀 BAN USER</button>
+            <button id="adm-mute" class="m-btn adm" onclick="adminOp('MUTE')">🔇 MUTE USER</button>
+            <button class="m-btn" onclick="closeModal()" style="text-align:center; color:#555">Закрыть</button>
+        </div>
+    </div>
+
+    <div id="group-creator">
+        <div class="m-content" style="max-width:320px">
+            <div style="padding:15px; background:#111; font-weight:bold">ВЫБЕРИ УЧАСТНИКОВ</div>
+            <div id="selector-list" style="max-height:300px; overflow-y:auto"></div>
+            <div style="padding:15px">
+                <input type="text" id="g-name-in" placeholder="Название группы" style="margin-bottom:10px">
+                <button class="rainbow" onclick="submitGroup()">СОЗДАТЬ</button>
+                <button class="m-btn" onclick="document.getElementById('group-creator').style.display='none'" style="text-align:center">Отмена</button>
             </div>
         </div>
     </div>
 
+    <div id="chat-ui">
+        <div id="header"><span onclick="closeChat()" style="cursor:pointer">← НАЗАД</span> <span id="chat-name">ЧАТ</span></div>
+        <div id="msgs"></div>
+        <div style="padding:15px; background:#0a0a0a; display:flex; gap:8px">
+            <input type="text" id="m-in" placeholder="Сообщение..." style="margin:0">
+            <button class="rainbow" style="width:60px; margin:0" onclick="send()">➤</button>
+        </div>
+    </div>
+
     <script>
-        // Инициализация базы данных
-        const firebaseConfig = {
-            apiKey: "AIzaSyAThHqr7jix2KbL7q9kc3JJ4_dMpn09q-o",
-            databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com",
-            projectId: "nnitro-system"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
+        const config = { databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com" };
+        firebase.initializeApp(config);
         const db = firebase.database();
 
-        let myData = { n: "", e: "", c: "" };
-        let allUsers = {};
+        let me = {}; let target = ""; let curChatId = ""; let allUsers = [];
 
-        function connect() {
+        async function login() {
+            const n = document.getElementById('nick').value.trim();
             const p = document.getElementById('pass').value;
-            myData.n = document.getElementById('nick').value.trim();
-            myData.e = document.getElementById('emoji').value || "👤";
-            myData.c = document.getElementById('clan-emoji').value || "🚩";
-
-            if (p === 'NNITRO-2026' && myData.n) {
-                document.getElementById('auth-overlay').style.display = 'none';
-                document.getElementById('app').style.display = 'flex';
-                
-                if(myData.n.toLowerCase() === 'vaad') {
-                    document.getElementById('vaad-admin').style.display = 'block';
-                }
-
-                db.ref('users/' + myData.n).set(myData);
-                run();
-            } else {
-                alert("ОШИБКА ДОСТУПА");
-            }
+            if(!n || !p) return;
+            if(n.toLowerCase() === 'vaad' && p !== 'zip123') return alert("ERROR");
+            const snap = await db.ref('users/' + n).once('value');
+            if(snap.val() && snap.val().p !== p) return alert("WRONG PASS");
+            me = { n, e: document.getElementById('emo').value || "👤", c: document.getElementById('cln').value || "🚩", p };
+            db.ref('users/' + n).set(me);
+            document.getElementById('auth').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            document.getElementById('my-n').innerText = n;
+            sync();
         }
 
-        function run() {
-            // Слушаем список юзеров для кланов
-            db.ref('users').on('value', snap => {
-                allUsers = snap.val() || {};
-                updateClans();
-                
-                // Обновляем инфо о себе
-                const myClanMembers = Object.values(allUsers).filter(u => u.c === myData.c).length;
-                document.getElementById('me-info').innerHTML = `
-                    <span style="font-size:20px">${myData.e}</span> <b>${myData.n}</b><br>
-                    <small style="color:red">Твой клан: ${myData.c} (${myClanMembers} чел.)</small>
-                `;
+        function sync() {
+            db.ref('users').on('value', s => {
+                allUsers = [];
+                const uBox = document.getElementById('user-list');
+                const sBox = document.getElementById('selector-list');
+                uBox.innerHTML = ''; sBox.innerHTML = '';
+                s.forEach(u => {
+                    const d = u.val();
+                    allUsers.push(d);
+                    if(d.n !== me.n) {
+                        uBox.innerHTML += `<div class="item" onclick="openMenu('${d.n}')"><span>${d.e}</span><b>${d.n}</b></div>`;
+                        sBox.innerHTML += `<div class="sel-item"><input type="checkbox" value="${d.n}"> ${d.n}</div>`;
+                    }
+                });
             });
 
-            // Слушаем чат
-            db.ref('chat').limitToLast(50).on('value', snap => {
-                const box = document.getElementById('messages');
+            db.ref('groups').on('value', s => {
+                const gBox = document.getElementById('group-list');
+                gBox.innerHTML = '';
+                s.forEach(g => {
+                    const d = g.val();
+                    if(d.members.includes(me.n)) {
+                        gBox.innerHTML += `<div class="item" onclick="openChat('${g.key}', '${d.name}')"><span class="g-tag">GROUP</span><b>${d.name}</b></div>`;
+                    }
+                });
+            });
+        }
+
+        function openMenu(name) {
+            target = name;
+            document.getElementById('modal').style.display = 'flex';
+            if(me.n.toLowerCase() === 'vaad') document.querySelectorAll('.adm').forEach(b => b.style.display = 'block');
+        }
+
+        function openPrivate() {
+            const id = [me.n, target].sort().join('_');
+            openChat(id, "ЛС: " + target);
+            closeModal();
+        }
+
+        function openGroupCreator() { document.getElementById('group-creator').style.display = 'flex'; }
+
+        function submitGroup() {
+            const name = document.getElementById('g-name-in').value || "Новая группа";
+            const selected = Array.from(document.querySelectorAll('#selector-list input:checked')).map(i => i.value);
+            if(selected.length < 2) return alert("Нужно минимум +2 человека (всего 3)");
+            selected.push(me.n);
+            const gid = "group_" + Date.now();
+            db.ref('groups/' + gid).set({ name, members: selected });
+            document.getElementById('group-creator').style.display = 'none';
+        }
+
+        function openChat(id, name) {
+            curChatId = id;
+            document.getElementById('chat-name').innerText = name;
+            document.getElementById('chat-ui').style.display = 'flex';
+            db.ref('msgs/' + id).limitToLast(50).on('value', s => {
+                const box = document.getElementById('msgs');
                 box.innerHTML = '';
-                snap.forEach(m => {
+                s.forEach(m => {
                     const d = m.val();
-                    const isMe = d.u === myData.n;
-                    box.innerHTML += `<div class="m ${isMe ? 'my' : ''}">
-                        <b style="font-size:10px; color:rgba(255,255,255,0.5)">${d.e} ${d.u} [${d.c}]</b><br>${d.t}
-                    </div>`;
+                    box.innerHTML += `<div class="m ${d.u === me.n ? 'my' : ''}"><b>${d.u}:</b><br>${d.t}</div>`;
                 });
                 box.scrollTop = box.scrollHeight;
             });
         }
 
-        function updateClans() {
-            const counts = {};
-            const members = {};
-            
-            Object.values(allUsers).forEach(u => {
-                counts[u.c] = (counts[u.c] || 0) + 1;
-                if(!members[u.c]) members[u.c] = [];
-                members[u.c].push(u.n);
-            });
-
-            const sorted = Object.keys(counts).sort((a,b) => counts[b] - counts[a]);
-            const list = document.getElementById('clan-list');
-            list.innerHTML = '';
-
-            sorted.forEach(c => {
-                list.innerHTML += `
-                    <div class="clan-box" onclick="alert('Участники клана ${c}:\\n${members[c].join(', ')}')">
-                        <span>${c} КЛАН</span>
-                        <span class="badge">${counts[c]}</span>
-                    </div>`;
-            });
-        }
-
         function send() {
-            const i = document.getElementById('msg-in');
+            const i = document.getElementById('m-in');
             if(!i.value.trim()) return;
-            db.ref('chat').push({ u: myData.n, e: myData.e, c: myData.c, t: i.value });
+            db.ref('msgs/' + curChatId).push({ u: me.n, t: i.value });
             i.value = '';
         }
 
-        // Отправка по Enter
-        document.getElementById('msg-in').addEventListener('keypress', e => { if(e.key === 'Enter') send(); });
+        function closeChat() { document.getElementById('chat-ui').style.display = 'none'; }
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        function adminOp(t) { if(t === 'BAN') db.ref('users/' + target).remove(); closeModal(); }
     </script>
 </body>
 </html>
