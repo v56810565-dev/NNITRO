@@ -2,31 +2,88 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>NNITRO OS FIX</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NNITRO FIXED</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        :root {
-            --rainbow: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            margin: 0; font-family: sans-serif; height: 100vh; 
-            background: #0a0a0a; color: white; display: flex; overflow: hidden;
-        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; height: 100vh; display: flex; overflow: hidden; }
         
-        #app-bg {
-            position: fixed; inset: 0; z-index: -1;
-            background: var(--rainbow); background-size: 400% 400%;
-            animation: rainbowAnim 15s ease infinite; opacity: 0.12; filter: blur(60px);
-        }
-        @keyframes rainbowAnim { 0% {background-position: 0% 50%} 50% {background-position: 100% 50%} 100% {background-position: 0% 50%} }
+        /* Радужный фон */
+        #bg { position: fixed; inset: 0; background: linear-gradient(45deg, #f00, #0f0, #00f, #f0f); background-size: 400%; animation: b 15s infinite; opacity: 0.1; z-index: -1; }
+        @keyframes b { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 
-        #sidebar { 
-            width: 300px; background: rgba(0,0,0,0.8); border-right: 1px solid #222; 
-            display: flex; flex-direction: column; transition: 0.3s; z-index: 100;
-        }
+        /* Окно входа */
+        #gate { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+        input { padding: 12px; border-radius: 8px; border: 1px solid #444; background: #111; color: #fff; width: 250px; outline: none; }
+        button { padding: 12px 25px; border-radius: 8px; border: none; background: #fff; color: #000; font-weight: bold; cursor: pointer; }
+
+        /* Интерфейс */
+        #sidebar { width: 300px; border-right: 1px solid #222; background: rgba(10,10,10,0.9); display: flex; flex-direction: column; }
+        #chat { flex: 1; display: flex; flex-direction: column; background: #050505; }
         
         @media (max-width: 768px) {
-            #sidebar { position:
+            #sidebar { display: none; } /* На мобилках пока скроем для теста */
+            #sidebar.open { display: flex; position: absolute; height: 100%; z-index: 100; width: 80%; }
+        }
+
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .m { background: #222; padding: 10px; border-radius: 10px; max-width: 80%; }
+        .m.my { align-self: flex-end; background: #007bff; }
+        
+        .special { background: linear-gradient(90deg, #ff00cc, #3333ff); padding: 15px; margin: 5px; border-radius: 12px; font-weight: bold; }
+
+        #input-area { padding: 15px; border-top: 1px solid #222; display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+    <div id="bg"></div>
+
+    <div id="gate">
+        <h1 style="color: #fff; letter-spacing: 5px;">NNITRO</h1>
+        <input type="password" id="sys_pass" placeholder="Код системы">
+        <button onclick="login()">ВОЙТИ В СИСТЕМУ</button>
+    </div>
+
+    <div id="sidebar">
+        <div style="padding: 15px;"><input type="text" id="srch" placeholder="Поиск..." style="width: 100%;" oninput="filter()"></div>
+        <div id="users">
+            <div class="special">⭐ ИЗБРАННОЕ</div>
+            <div class="special">⚡ AI ZIP NEURO</div>
+            <div id="user-list-inner"></div>
+        </div>
+    </div>
+
+    <div id="chat">
+        <header style="padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between;">
+            <span onclick="toggleMenu()" style="cursor:pointer">☰</span>
+            <b>NNITRO CHAT</b>
+            <span id="adm" style="color: cyan; display: none;">ADM</span>
+        </header>
+        <div id="messages"></div>
+        <div id="input-area">
+            <input type="text" id="minp" placeholder="Сообщение..." style="flex:1">
+            <button onclick="send()">➤</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAThHqr7jix2KbL7q9kc3JJ4_dMpn09q-o",
+            databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com",
+            projectId: "nnitro-system",
+            appId: "1:927836043640:web:d9b320347c888b1d1f708d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        
+        let user = localStorage.getItem('nn_u');
+
+        function login() {
+            const p = document.getElementById('sys_pass').value;
+            if(p === 'NNITRO-2026') {
+                document.getElementById('gate').style.display = 'none';
+                if(!user) {
+                    let n = prompt("Твой ник:");
+                    if(n) { user = n; localStorage.setItem('nn
