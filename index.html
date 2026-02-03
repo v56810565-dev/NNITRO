@@ -3,87 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NNITRO V29</title>
+    <title>NNITRO V35 | PRIVATE</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        :root { --neon: #fffb00; --bg: #000; --card: #0d0d0d; }
-        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        :root { --neon: #fffb00; --bg: #000; --card: #0d0d0d; --blue: #0088ff; --fire: #ff4500; }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: #fff; font-family: sans-serif; height: 100vh; overflow: hidden; }
         
-        /* Если видишь черный экран - значит этот блок не скрылся */
-        #auth { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .auth-box { width: 90%; max-width: 340px; text-align: center; background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #222; }
+        /* AUTH SCREEN */
+        #auth { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .auth-box { width: 100%; max-width: 320px; background: #111; padding: 25px; border-radius: 30px; border: 1px solid #222; text-align: center; }
+        .auth-box h2 { color: var(--neon); font-size: 20px; margin-bottom: 20px; letter-spacing: 2px; }
         
-        input { width: 100%; padding: 15px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 10px; font-size: 16px; }
-        .btn { width: 100%; padding: 15px; background: var(--neon); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        /* 4 INPUT FIELDS */
+        .auth-box input { width: 100%; padding: 14px; margin: 6px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 14px; font-size: 15px; text-align: center; transition: 0.3s; }
+        .auth-box input:focus { border-color: var(--neon); background: #050505; }
+        
+        .btn { width: 100%; padding: 16px; background: var(--neon); border: none; border-radius: 14px; font-weight: 900; cursor: pointer; margin-top: 15px; color: #000; text-transform: uppercase; }
 
+        /* APP INTERFACE */
         #app { display: none; flex-direction: column; height: 100vh; }
-        .header { padding: 15px; background: #050505; border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; font-size: 13px; }
-        .scroll { flex: 1; overflow-y: auto; padding: 15px; }
+        .header { padding: 15px 20px; background: #050505; border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; align-items: center; }
+        .view { flex: 1; overflow-y: auto; padding: 15px; }
         
-        .unit { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #1a1a1a; display: flex; align-items: center; gap: 15px; }
-        .ico { width: 40px; height: 40px; background: #1a1a1a; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        
-        #chat-ui { position: fixed; inset: 0; background: #000; display: none; flex-direction: column; z-index: 10000; }
-        .msgs { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .m { padding: 10px 15px; border-radius: 15px; max-width: 80%; font-size: 15px; }
-        .m.me { background: var(--neon); color: #000; align-self: flex-end; }
-        .m.to { background: #1a1a1a; color: #fff; align-self: flex-start; }
-        .bar { padding: 15px; background: #050505; display: flex; gap: 10px; }
+        /* LIST UNITS */
+        .unit { background: var(--card); padding: 12px; border-radius: 20px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; border: 1px solid #1a1a1a; }
+        .ava-box { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+        .ava { width: 100%; height: 100%; background: #1a1a1a; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; border: 1px solid #222; }
+        .badge { position: absolute; bottom: -3px; right: -3px; font-size: 13px; background: #000; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: 1px solid #111; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+
+        /* CHAT */
+        #chat-ui { position: fixed; inset: 0; background: #000; display: none; flex-direction: column; z-index: 5000; }
+        .msgs { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .m { padding: 12px 16px; border-radius: 18px; max-width: 80%; font-size: 15px; line-height: 1.4; }
+        .m.me { background: var(--neon); color: #000; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .m.to { background: #181818; color: #fff; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #222; }
+        .bar { padding: 15px 15px 35px; background: #050505; display: flex; gap: 10px; border-top: 1px solid #1a1a1a; }
     </style>
 </head>
 <body>
 
     <div id="auth">
         <div class="auth-box">
-            <h2 style="color:var(--neon); margin-bottom: 20px;">VAaD SYSTEM V29</h2>
+            <h2>NNITRO V35</h2>
             <input type="text" id="a-nick" placeholder="NICKNAME">
             <input type="password" id="a-pass" placeholder="PASSWORD">
-            <input type="text" id="a-code" placeholder="CODE">
+            <input type="text" id="a-emo" placeholder="AVATAR EMOJI (🔥,💀..)">
+            <input type="password" id="a-code" placeholder="ACCESS CODE">
             <button class="btn" onclick="handleAuth()">LOGIN</button>
         </div>
-        <p style="font-size: 10px; color: #333; margin-top: 20px;">BUILD: 2026.02.02</p>
     </div>
 
     <div id="app">
         <div class="header">
             <span>USER: <b id="my-n" style="color:var(--neon)"></b></span>
-            <span onclick="location.reload()">RELOAD</span>
+            <div id="my-ava-top" style="font-size: 22px;"></div>
         </div>
-        <div class="scroll">
-            <input type="text" id="search" placeholder="Search..." oninput="sync()" style="margin-bottom: 20px;">
-            
-            <div style="font-size:10px; color:#444; margin-bottom:10px;">SYSTEM</div>
-            <div class="unit" style="border-color: var(--neon)" onclick="openChat('ZIP_SYSTEM', 'ZIP_AI')">
-                <div class="ico" style="background:var(--neon); color:#000;">⚡</div>
-                <div><b>ZIP_AI</b></div>
-            </div>
-
-            <div style="font-size:10px; color:#444; margin: 20px 0 10px;">CHATS</div>
-            <div id="t-list"></div>
-            <div id="a-list"></div>
-            <div id="u-list"></div>
+        <div class="view">
+            <input type="text" id="search" placeholder="Search ID..." oninput="sync()" style="margin-bottom:15px; background:#111; border-radius:10px; padding:12px; border:1px solid #222; color:#fff; width:100%">
+            <div id="list"></div>
         </div>
     </div>
 
     <div id="chat-ui">
         <div class="header">
-            <span onclick="closeChat()" style="color:var(--neon)">← BACK</span>
-            <b id="chat-name"></b>
-            <span></span>
+            <span onclick="closeChat()" style="color:var(--neon); font-weight:bold; cursor:pointer; padding:5px;">← BACK</span>
+            <b id="chat-name">Target</b>
+            <div id="chat-badge-header"></div>
         </div>
         <div class="msgs" id="msgs"></div>
         <div class="bar">
-            <input type="text" id="m-in" placeholder="Message..." style="margin:0;">
-            <button class="btn" style="width:60px; margin:0;" onclick="send()">OK</button>
+            <input type="text" id="m-in" placeholder="Message..." style="flex:1; background:#111; border:1px solid #222; color:#fff; padding:12px; border-radius:12px;">
+            <button class="btn" style="width:70px; margin:0; padding:0" onclick="send()">OK</button>
         </div>
     </div>
 
     <script>
-        // Конфиг без лишних пробелов и переносов
-        const firebaseConfig = { databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com" };
-        
-        try {
-            firebase.initializeApp(firebaseConfig);
-            var db = firebase.database();
+        const cfg = { databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com" };
+        firebase.initializeApp(cfg);
+        const db = firebase.database();
+
+        let me = "";
+        const DEF_EMOS = ["👤","👽","💀","🥷","🧊"];
+
+        async function handleAuth() {
+            const n = document.getElementById('a-nick').value.trim().toUpperCase();
+            const p = document.getElementById('a-pass').value.trim();
+            const e = document.getElementById('a-emo').value.trim();
+            const c = document.getElementById('a-code').value.trim();
+
+            // ПРОВЕРКА КОДА
+            if(c !== "NNITRO-2026") {
+                alert("INVALID ACCESS CODE");
+                return;
+            }
+
+            if(!n || !p) return alert("NICK & PASS REQUIRED");
+
+            // VAAD LOGIN
+            if(n === "VAAD" && p === "777") { login(n, e || "🔥"); return; }
+
+            const snap = await db.ref('profiles/' + n).once('value');
+            if(snap.exists()) {
+                if(snap.val().p === p) login(n, snap.val().e); 
+                else alert("WRONG PASSWORD");
+            } else {
+                const finalEmo = e || DEF_EMOS[Math.floor(Math.random()*DEF_EMOS.length)];
+                await db.ref('profiles/'+n).set({n, p, e: finalEmo, v: false});
+                login(n, finalEmo);
+            }
+        }
+
+        function login(n, emo) {
+            me = n;
+            document.getElementById('auth').style.display='none';
+            document.getElementById('app').style.display='flex';
+            document.getElementById('my-n').innerText = me;
+            document.getElementById('my-ava-top').innerText = emo;
+            sync();
+        }
+
+        function sync() {
+            const sV = document.getElementById('search').value.toUpperCase();
+            db.ref('profiles').on('value', s => {
+                const box = document.getElementById('list'); box.innerHTML = '';
+                s.forEach(u => {
+                    const d = u.val(); if(d.n === me) return;
+                    if(sV && !d.n.includes(sV)) return;
+
+                    let bTag = '';
+                    if(d.n === 'VAAD') bTag = '<div class="badge">🔥</div>';
+                    else if(d.v === true) bTag = '<div class="badge">✅</div>';
+
+                    box.innerHTML += `
+                    <div class="unit" onclick="openChat('${d.n}', '${d.e}', '${bTag}')">
+                        <div class="ava-box">
+                            <div class="ava">${d.e}</div>
+                            ${bTag}
+                        </div>
+                        <b style="font-size:16px;">${d.n}</b>
+                    </div>`;
+                });
+            });
+        }
+
+        let curChat = "";
+        function openChat(id, emo, badge) {
+            curChat = [me, id].sort().join('_');
+            document.getElementById('chat-name').innerText = id;
+            document.getElementById('chat-badge-header').innerHTML = badge;
+            document.getElementById('chat-ui').style.display = 'flex';
+            db.ref('msgs/'+curChat).on('value', s => {
+                const b = document.getElementById('msgs'); b.innerHTML = '';
+                s.forEach(m => {
+                    b.innerHTML += `<div class="m ${m.val().u===me?'me':'to'}">${m.val().t}</div>`;
+                });
+                b.scrollTop = b.scrollHeight;
+            });
+        }
+
+        function send() {
+            const i = document.getElementById('m-in'); if(!i.value.trim()) return;
+            db.ref('msgs/'+curChat).push({u:me, t:i.value});
+            i.value = '';
+        }
+
+        function closeChat() { document.getElementById('chat-ui').style.display='none'; }
+        document.getElementById('m-in').addEventListener("keypress", (e) => { if(e.key === "Enter") send(); });
+    </script>
+</body>
+</html>
