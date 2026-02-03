@@ -1,84 +1,92 @@
-<button onclick="sendGlobalAlert()" style="background:orange; color:black;">GLOBAL ALERT</button>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NNITRO OS</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <style>
+        :root { --orange: #ff8c00; --bg: #ff9d2e; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; }
 
-<button onclick="toggleIgnore()" id="ignore-btn" style="border:none; background:none; font-size:12px; color:red;">[БЛОК]</button>
+        /* ВХОД */
+        #auth { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .auth-form { width: 85%; max-width: 320px; text-align: center; }
+        input, select { width: 100%; padding: 16px; margin: 8px 0; border: none; border-radius: 12px; font-size: 16px; outline: none; background: #fff; color: #333; }
+        .btn-log { width: 100%; padding: 18px; background: #000; color: #fff; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; margin-top: 10px; }
 
-<script>
-    // --- 1. ГЛОБАЛЬНОЕ ОПОВЕЩЕНИЕ (Только для VAAD) ---
-    function sendGlobalAlert() {
-        const txt = prompt("ТЕКСТ ОПОВЕЩЕНИЯ ДЛЯ ВСЕХ:");
-        if (!txt) return;
-        // Записываем в специальную ветку
-        db.ref('system/alert').set({
-            msg: txt,
-            from: 'SYSTEM / VAAD',
-            ts: Date.now()
-        });
-    }
+        /* ИНТЕРФЕЙС */
+        #app { display: none; flex-direction: column; height: 100vh; }
+        .top-bar { padding: 20px; background: rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .main-list { flex: 1; overflow-y: auto; padding: 12px; }
+        .chat-card { background: rgba(255,255,255,0.15); padding: 18px; border-radius: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; backdrop-filter: blur(10px); cursor: pointer; }
+        .ava { width: 48px; height: 48px; border-radius: 50%; background: #fff; color: var(--orange); display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
-    // Слушатель оповещений (для всех юзеров)
-    function listenAlerts() {
-        db.ref('system/alert').on('value', s => {
-            const data = s.val();
-            if (data && data.ts > (Date.now() - 10000)) { // Показываем только свежие (последние 10 сек)
-                alert("📢 ВНИМАНИЕ ОТ АДМИНИСТРАЦИИ:\n\n" + data.msg);
-            }
-        });
-    }
+        /* ОКНО ЧАТА */
+        #chat-win { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; z-index: 9000; }
+        .chat-header { padding: 15px; background: rgba(0,0,0,0.1); display: flex; align-items: center; gap: 15px; }
+        .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 12px 16px; border-radius: 18px; max-width: 80%; background: rgba(255,255,255,0.2); font-size: 15px; }
+        .msg.me { background: #000; align-self: flex-end; }
+        .chat-input { padding: 15px; display: flex; gap: 10px; background: rgba(0,0,0,0.05); }
 
-    // --- 2. ЛИЧНЫЙ ИГНОР (ЧЕРНЫЙ СПИСОК) ---
-    function toggleIgnore() {
-        const isIgnored = my.blacklist && my.blacklist[cur];
-        if (confirm(isIgnored ? `Разблокировать ${cur}?` : `Заблокировать ${cur}?`)) {
-            db.ref(`users/${my.n}/blacklist/${cur}`).set(isIgnored ? null : true);
-            alert("ГОТОВО");
-        }
-    }
+        /* АДМИНКА */
+        #adm-menu { display: none; background: #000; padding: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        #adm-menu button { background: #ff4400; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; }
+    </style>
+</head>
+<body>
 
-    // Модифицированная функция отправки с проверкой игнора
-    async function send(type = 't', val = null) {
-        // Проверка: не замучен ли я админом
-        const myData = await db.ref(`users/${my.n}`).once('value');
-        if (myData.val().muted) return alert("У ВАС МУТ");
+    <div id="auth">
+        <div class="auth-form">
+            <h1 style="font-size: 45px; margin-bottom: 25px;">NNITRO</h1>
+            <input type="text" id="n" placeholder="НИК">
+            <input type="password" id="p" placeholder="ПАРОЛЬ">
+            <select id="e"><option value="🔥">🔥</option><option value="👑">👑</option><option value="💎">💎</option><option value="🥷">🥷</option></select>
+            <input type="password" id="k" placeholder="КОД">
+            <button class="btn-log" onclick="start()">ВОЙТИ</button>
+        </div>
+    </div>
 
-        // Проверка: не заблокировал ли меня получатель (cur)
-        if (cur !== 'GLOBAL_GROUP') {
-            const targetData = await db.ref(`users/${cur}/blacklist/${my.n}`).once('value');
-            if (targetData.exists()) return alert("ПОЛЬЗОВАТЕЛЬ ВАС ЗАБЛОКИРОВАЛ");
-        }
+    <div id="app">
+        <div id="adm-menu">
+            <button onclick="adm('ban')">BAN</button>
+            <button onclick="adm('mute')">MUTE</button>
+            <button onclick="adm('unban')">UNBAN</button>
+            <button onclick="db.ref().remove()">WIPE ALL</button>
+        </div>
+        <div class="top-bar">
+            <div>
+                <h2 id="myNick" onclick="showAdm()"></h2>
+                <small id="onlineCount">СЕТЬ: 0</small>
+            </div>
+            <div id="myAva" class="ava"></div>
+        </div>
+        <div class="main-list" id="list"></div>
+        <button onclick="addGrp()" style="position:fixed; bottom:25px; right:25px; width:65px; height:65px; border-radius:50%; background:#000; color:#fff; border:none; font-size:35px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">+</button>
+    </div>
 
-        const i = document.getElementById('m-in');
-        const content = val || i.value.trim();
-        if (!content) return;
+    <div id="chat-win">
+        <div class="chat-header">
+            <span onclick="document.getElementById('chat-win').style.display='none'" style="font-size:35px; cursor:pointer">←</span>
+            <b id="chatTitle"></b>
+        </div>
+        <div class="messages" id="msgs"></div>
+        <div class="chat-input">
+            <input type="text" id="mIn" placeholder="Сообщение...">
+            <button onclick="send()" style="background:none; border:none; color:#000; font-weight:900; font-size:18px;">OK</button>
+        </div>
+    </div>
 
-        const room = cur === 'GLOBAL_GROUP' ? 'GLOBAL_GROUP' : [my.n, cur].sort().join('_');
-        db.ref('msgs/' + room).push({ u: my.n, t: content, type: type });
-        i.value = '';
-    }
+    <script>
+        const config = { databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com" };
+        firebase.initializeApp(config);
+        const db = firebase.database();
+        let my = {}, cur = "";
 
-    // --- 3. ГРУППОВЫЕ ЧАТЫ ---
-    // В draw() теперь добавляем "ОБЩИЙ ЧАТ" в начало списка
-    function draw() {
-        const box = document.getElementById('list'); box.innerHTML = '';
-        
-        // Кнопка общего чата
-        box.innerHTML += `
-            <div class="item" onclick="openChat('GLOBAL_GROUP', '🌐')" style="background:#eefaff; border:1px solid #007aff;">
-                <div class="ava-ring">🌐</div>
-                <b>ОБЩИЙ ЧАТ (GROUP)</b>
-            </div>`;
-
-        Object.values(users).forEach(u => {
-            if (u.n === my.n) return;
-            box.innerHTML += `
-                <div class="item" onclick="openChat('${u.n}', '${u.e}')">
-                    <div class="ava-ring">${u.e}</div>
-                    <b>${u.n}</b>
-                </div>`;
-        });
-    }
-
-    // Включаем прослушку алертов при старте приложения
-    // (Вызывать внутри функции showApp или в конце auth)
-    listenAlerts();
-
-</script>
+        async function start() {
+            const n = document.getElementById('n').value.trim();
+            const k = document.getElementById('k').value;
+            if (k !== 'NNITRO-2026'
