@@ -3,207 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NNITRO ULTIMATE</title>
+    <title>NNITRO GOLD V63</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        :root { --orange: #ff8c00; --dark: #1a1a1a; --gray: #2d2d2d; }
+        :root { --main: #ff8c00; --dark: #121212; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--orange); color: #fff; height: 100vh; overflow: hidden; }
-
-        /* AUTH SCREEN */
-        #auth { position: fixed; inset: 0; background: var(--orange); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .auth-card { width: 85%; max-width: 350px; background: rgba(0,0,0,0.1); padding: 30px; border-radius: 25px; backdrop-filter: blur(10px); }
-        input, select { width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 15px; font-size: 16px; background: #fff; color: #000; outline: none; }
-        .auth-btns { display: flex; gap: 10px; margin-top: 15px; }
-        .btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-black { background: #000; color: #fff; }
-        .btn-white { background: #fff; color: #000; }
-
-        /* MAIN APP */
-        #app { display: none; flex-direction: column; height: 100vh; background: var(--orange); }
-        .top-nav { padding: 15px 20px; background: rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .search-bar { padding: 10px 20px; }
-        .search-bar input { margin: 0; background: rgba(255,255,255,0.2); color: #fff; }
-        .search-bar input::placeholder { color: #eee; }
-
-        .list-container { flex: 1; overflow-y: auto; padding: 15px; }
-        .chat-item { background: rgba(255,255,255,0.15); padding: 15px; border-radius: 20px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; position: relative; }
-        .badge { background: #007bff; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; position: absolute; left: 45px; bottom: 15px; border: 2px solid var(--orange); }
-        .ava { width: 50px; height: 50px; border-radius: 50%; background: #fff; color: var(--orange); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; }
+        body { background: var(--main); color: #fff; height: 100vh; overflow: hidden; }
         
-        /* CHAT WINDOW */
-        #chat-win { position: fixed; inset: 0; background: var(--orange); display: none; flex-direction: column; z-index: 9000; }
-        .chat-head { padding: 15px; background: rgba(0,0,0,0.1); display: flex; align-items: center; gap: 15px; font-size: 18px; }
-        .msg-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-        .bubble { padding: 12px 18px; border-radius: 20px; max-width: 75%; background: rgba(255,255,255,0.25); position: relative; }
-        .bubble.me { background: #000; align-self: flex-end; }
-        .bubble b { display: block; font-size: 12px; margin-bottom: 4px; opacity: 0.8; }
-        
-        .chat-tools { padding: 15px; background: rgba(0,0,0,0.1); display: flex; align-items: center; gap: 10px; }
-        .tool-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #fff; }
-        
-        /* ADMIN PANEL */
-        #adm-bar { display: none; background: #ff3b3b; padding: 8px; justify-content: center; gap: 10px; font-size: 12px; }
+        /* AUTH */
+        #auth { position: fixed; inset: 0; background: var(--main); z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .card { width: 90%; max-width: 380px; background: rgba(0,0,0,0.2); padding: 30px; border-radius: 30px; backdrop-filter: blur(20px); text-align: center; }
+        input, select { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 12px; outline: none; font-weight: bold; }
+        .btns { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 15px; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; transition: 0.2s; }
+        .btn-b { background: #000; color: #fff; }
+        .btn-w { background: #fff; color: #000; }
 
-        .verified::after { content: ' ✔'; color: #007bff; font-weight: bold; }
+        /* MAIN */
+        #app { display: none; flex-direction: column; height: 100vh; }
+        .nav { padding: 15px 20px; background: rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .list { flex: 1; overflow-y: auto; padding: 15px; }
+        .item { background: rgba(255,255,255,0.15); padding: 15px; border-radius: 18px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; cursor: pointer; position: relative; }
+        .st { width: 12px; height: 12px; border-radius: 50%; background: #44ff44; position: absolute; left: 45px; bottom: 15px; border: 2px solid var(--main); display: none; }
+        .ava { width: 50px; height: 50px; border-radius: 50%; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+
+        /* CHAT */
+        #win { position: fixed; inset: 0; background: var(--main); display: none; flex-direction: column; z-index: 9000; }
+        .msgs { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .bbl { padding: 12px; border-radius: 18px; max-width: 80%; background: rgba(255,255,255,0.2); position: relative; font-size: 15px; }
+        .bbl.me { background: #000; align-self: flex-end; }
+        .bbl b { font-size: 11px; opacity: 0.7; display: block; }
+        .bar { padding: 15px; display: flex; gap: 10px; background: rgba(0,0,0,0.15); align-items: center; }
+
+        /* ADMIN */
+        #adm { display: none; background: #000; padding: 10px; flex-wrap: wrap; gap: 5px; justify-content: center; border-bottom: 2px solid red; }
+        #adm button { background: red; color: #fff; border: none; padding: 6px 10px; border-radius: 5px; font-size: 10px; font-weight: bold; }
+        .ver::after { content: ' ✔'; color: #007bff; }
     </style>
 </head>
 <body>
 
     <div id="auth">
-        <div class="auth-card">
-            <h1 style="text-align:center; margin-bottom:20px; font-size:40px;">NNITRO</h1>
-            <input type="text" id="log-n" placeholder="Никнейм">
-            <input type="password" id="log-p" placeholder="Пароль">
-            <select id="log-e"><option value="🔥">🔥 Огонь</option><option value="👑">Корона</option><option value="🥷">Ниндзя</option></select>
-            <input type="password" id="log-k" placeholder="Секретный код">
-            <div class="auth-btns">
-                <button class="btn btn-white" onclick="authUser('reg')">РЕГИСТРАЦИЯ</button>
-                <button class="btn btn-black" onclick="authUser('login')">ВХОД</button>
+        <div class="card">
+            <h1>NNITRO GOLD</h1>
+            <input id="un" placeholder="НИКНЕЙМ">
+            <input type="password" id="up" placeholder="ПАРОЛЬ">
+            <select id="ue"><option value="🔥">V-VIP</option><option value="👑">CREATOR</option><option value="🥷">NINJA</option></select>
+            <input id="uk" placeholder="КОД (NNITRO-2026)">
+            <div class="btns">
+                <button class="btn btn-w" onclick="start('reg')">РЕГИСТРАЦИЯ</button>
+                <button class="btn btn-b" onclick="start('log')">ВХОД</button>
             </div>
         </div>
     </div>
 
     <div id="app">
-        <div id="adm-bar">
-            <b>ADMIN PANEL:</b>
-            <button onclick="admOp('ban')">BAN</button>
-            <button onclick="admOp('mute')">MUTE</button>
-            <button onclick="db.ref().remove()">WIPE</button>
+        <div id="adm">
+            <button onclick="admAct('pass')">PASS RESET</button>
+            <button onclick="admAct('ban')">BAN</button>
+            <button onclick="admAct('unban')">UNBAN</button>
+            <button onclick="admAct('mute')">MUTE</button>
+            <button onclick="admAct('ver')">VERIFY</button>
+            <button onclick="admAct('bl')">BLACK LIST</button>
         </div>
-        <div class="top-nav">
-            <div>
-                <h2 id="me-name" onclick="toggleAdm()"></h2>
-                <small id="stat">Онлайн: 0</small>
-            </div>
-            <div id="me-ava" class="ava"></div>
+        <div class="nav">
+            <div onclick="showAdm()"><h2 id="my-n"></h2><small id="on-info">В сети: 0</small></div>
+            <div id="my-a" class="ava"></div>
         </div>
-        <div class="search-bar"><input type="text" placeholder="Поиск контактов..."></div>
-        <div class="list-container" id="chat-list">
-            <div class="chat-item" onclick="openCh('ZIP AI')"><div class="ava">🤖</div><b>ZIP AI Bot</b></div>
-            <div class="chat-item" onclick="openCh('FAVORITES')"><div class="ava">⭐</div><b>Избранное</b></div>
-            <div class="chat-item" onclick="openCh('GLOBAL')"><div class="ava">🌐</div><b>Общий Чат</b></div>
-        </div>
+        <div class="list" id="main-list"></div>
     </div>
 
-    <div id="chat-win">
-        <div class="chat-head">
-            <span onclick="closeCh()" style="font-size:30px; cursor:pointer;">←</span>
-            <b id="chat-title"></b>
+    <div id="win">
+        <div class="nav">
+            <span onclick="document.getElementById('win').style.display='none'" style="font-size:30px; cursor:pointer">←</span>
+            <b id="win-t"></b>
         </div>
-        <div class="msg-box" id="msg-box"></div>
-        <div class="chat-tools">
-            <button class="tool-btn" onclick="sendMedia('📷')">📷</button>
-            <button class="tool-btn" onclick="sendMedia('📹')">📹</button>
-            <input type="text" id="m-input" placeholder="Сообщение..." style="flex:1; margin:0;">
-            <button class="tool-btn" id="mic-btn" onclick="sendMedia('🎤')">🎤</button>
-            <button onclick="sendMsg()" style="background:#000; border:none; color:#fff; padding:10px 20px; border-radius:12px; font-weight:bold;">OK</button>
+        <div class="msgs" id="m-box"></div>
+        <div class="bar">
+            <button onclick="sendVox()" style="background:none; border:none; font-size:24px;">🎤</button>
+            <input id="m-in" placeholder="Сообщение..." style="flex:1; margin:0;">
+            <button onclick="send()" style="background:#000; border:none; color:#fff; padding:10px 18px; border-radius:10px; font-weight:bold;">OK</button>
         </div>
     </div>
 
     <script>
-        // ИНИЦИАЛИЗАЦИЯ
         const config = { databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com" };
         firebase.initializeApp(config);
         const db = firebase.database();
-        let my = {}, activeChat = "";
+        let my = {}, cur = "";
 
-        async function authUser(type) {
-            const n = document.getElementById('log-n').value.trim();
-            const p = document.getElementById('log-p').value;
-            const e = document.getElementById('log-e').value;
-            const k = document.getElementById('log-k').value;
+        async function start(mode) {
+            const n = document.getElementById('un').value.trim();
+            const p = document.getElementById('up').value;
+            const e = document.getElementById('ue').value;
+            if(document.getElementById('uk').value !== 'NNITRO-2026') return alert("КОД!");
 
-            if (k !== 'NNITRO-2026' || !n) return alert("Ошибка доступа");
+            const ref = db.ref('users/'+n);
+            const s = await ref.once('value');
 
-            const userRef = db.ref('users/' + n);
-            const snap = await userRef.once('value');
+            if(mode === 'log' && (!s.exists() || s.val().p !== p)) return alert("ОШИБКА ВХОДА");
+            if(s.exists() && s.val().banned) return alert("ВЫ ЗАБАНЕНЫ!");
 
-            if (type === 'login' && !snap.exists()) return alert("Пользователь не найден");
-            if (snap.exists() && snap.val().p !== p) return alert("Неверный пароль");
-
-            my = { n, p, e, v: (n === 'VAaD' || n === 'Admin'), online: true };
-            await userRef.update(my);
+            my = { n, p, e, v: (n === 'VAaD'), online: true, regDate: s.exists() ? s.val().regDate : new Date().toLocaleDateString() };
+            await ref.update(my);
 
             document.getElementById('auth').style.display = 'none';
             document.getElementById('app').style.display = 'flex';
-            document.getElementById('me-name').className = my.v ? 'verified' : '';
-            document.getElementById('me-name').innerText = n;
-            document.getElementById('me-ava').innerText = e;
-            loadList();
+            document.getElementById('my-n').innerText = n;
+            if(my.v) document.getElementById('my-n').classList.add('ver');
+            document.getElementById('my-a').innerText = e;
+            sync();
         }
 
-        function loadList() {
+        function sync() {
             db.ref('users').on('value', s => {
-                const container = document.getElementById('chat-list');
-                const stat = document.getElementById('stat');
+                const list = document.getElementById('main-list');
                 let on = 0;
-                
-                // Очистка динамических юзеров, но сохранение системных
-                container.innerHTML = `
-                    <div class="chat-item" onclick="openCh('ZIP AI')"><div class="ava">🤖</div><b>ZIP AI Bot</b></div>
-                    <div class="chat-item" onclick="openCh('FAVORITES')"><div class="ava">⭐</div><b>Избранное</b></div>
-                    <div class="chat-item" onclick="openCh('GLOBAL')"><div class="ava">🌐</div><b>Общий Чат</b></div>
+                list.innerHTML = `
+                    <div class="item" onclick="openCh('ZIP AI')"><div class="ava">🤖</div><b>ZIP AI NEURO</b></div>
+                    <div class="item" onclick="openCh('GLOBAL')"><div class="ava">🌐</div><b>ОБЩИЙ ЧАТ (GLOBAL)</b></div>
                 `;
-
                 s.forEach(u => {
-                    const ud = u.val();
-                    if(ud.online) on++;
-                    if(ud.n === my.n) return;
-                    container.innerHTML += `
-                        <div class="chat-item" onclick="openCh('${ud.n}')">
-                            <div class="ava">${ud.e}</div>
-                            ${ud.online ? '<div class="badge"></div>' : ''}
-                            <b class="${ud.v ? 'verified' : ''}">${ud.n}</b>
-                        </div>
-                    `;
+                    const d = u.val();
+                    if(d.online) on++;
+                    if(d.n === my.n || d.banned) return;
+                    list.innerHTML += `
+                        <div class="item" onclick="openCh('${d.n}')">
+                            <div class="ava">${d.e}</div>
+                            ${d.online ? '<div class="st" style="display:block"></div>' : ''}
+                            <b class="${d.v ? 'ver' : ''}">${d.n}</b>
+                            <small style="margin-left:auto; opacity:0.5; font-size:9px;">${d.regDate}</small>
+                        </div>`;
                 });
-                stat.innerText = "Онлайн: " + on;
+                document.getElementById('on-info').innerText = "В СЕТИ: " + on;
             });
         }
 
-        function openCh(target) {
-            activeChat = target;
-            document.getElementById('chat-title').innerText = target;
-            document.getElementById('chat-win').style.display = 'flex';
-            
-            const path = (target === 'GLOBAL' || target === 'ZIP AI' || target === 'FAVORITES') ? 'rooms/'+target : 'pvt/'+[my.n, target].sort().join('_');
-            
+        function openCh(t) {
+            cur = t; document.getElementById('win-t').innerText = t;
+            document.getElementById('win').style.display = 'flex';
+            const path = (t === 'GLOBAL' || t === 'ZIP AI') ? 'rooms/'+t : 'pvt/'+[my.n, t].sort().join('_');
             db.ref(path).off();
             db.ref(path).on('value', s => {
-                const box = document.getElementById('msg-box'); box.innerHTML = '';
+                const b = document.getElementById('m-box'); b.innerHTML = '';
                 s.forEach(m => {
                     const d = m.val();
-                    box.innerHTML += `<div class="bubble ${d.u === my.n ? 'me' : ''}"><b>${d.u}</b>${d.t}</div>`;
+                    b.innerHTML += `<div class="bbl ${d.u === my.n ? 'me' : ''}"><b>${d.u}</b>${d.t}</div>`;
                 });
-                box.scrollTop = box.scrollHeight;
+                b.scrollTop = b.scrollHeight;
             });
         }
 
-        async function sendMsg() {
-            const t = document.getElementById('m-input').value.trim();
-            if(!t) return;
-            const path = (activeChat === 'GLOBAL' || activeChat === 'ZIP AI' || activeChat === 'FAVORITES') ? 'rooms/'+activeChat : 'pvt/'+[my.n, activeChat].sort().join('_');
+        async function send() {
+            const t = document.getElementById('m-in').value.trim();
+            const me = await db.ref('users/'+my.n).once('value');
+            if(!t || me.val().muted) return alert("MUTE!");
             
-            await db.ref(path).push({ u: my.n, t: t });
-            document.getElementById('m-input').value = '';
+            const path = (cur === 'GLOBAL' || cur === 'ZIP AI') ? 'rooms/'+cur : 'pvt/'+[my.n, cur].sort().join('_');
+            db.ref(path).push({ u: my.n, t });
+            document.getElementById('m-in').value = '';
 
-            if(activeChat === 'ZIP AI') {
-                setTimeout(() => {
-                    db.ref(path).push({ u: 'ZIP AI', t: 'Я получил твой запрос! Обрабатываю... 🚀' });
-                }, 1000);
+            if(cur === 'ZIP AI') {
+                setTimeout(() => db.ref(path).push({u:'ZIP AI', t:'[ZIP] Проанализировал. NNITRO работает стабильно. Система готова к бою.'}), 1000);
             }
         }
 
-        function sendMedia(type) {
-            const path = (activeChat === 'GLOBAL' || activeChat === 'ZIP AI' || activeChat === 'FAVORITES') ? 'rooms/'+activeChat : 'pvt/'+[my.n, activeChat].sort().join('_');
-            db.ref(path).push({ u: my.n, t: type + ' [Медиа-сообщение отправлено]' });
+        function sendVox() { 
+            const path = (cur === 'GLOBAL' || cur === 'ZIP AI') ? 'rooms/'+cur : 'pvt/'+[my.n, cur].sort().join('_');
+            db.ref(path).push({ u: my.n, t: '🎤 Голосовое сообщение (0:05)' });
         }
 
-        function toggleAdm() { if(my.v) { const b = document.getElementById('adm-bar'); b.style.display = b.style.display === 'flex' ? 'none' : 'flex'; } }
-        function closeCh() { document.getElementById('chat-win').style.display = 'none'; }
-        
+        function showAdm() { if(my.n === 'VAaD') { const a = document.getElementById('adm'); a.style.display = a.style.display==='flex'?'none':'flex'; } }
+
+        async function admAct(type) {
+            if(type === 'bl') {
+                const s = await db.ref('users').once('value');
+                let bl = "ЧЕРНЫЙ СПИСОК:\n";
+                s.forEach(u => { if(u.val().banned) bl += u.key + "\n"; });
+                alert(bl); return;
+            }
+            const u = prompt("НИК:"); if(!u) return;
+            if(type === 'pass') { const p = prompt("НОВЫЙ ПАРОЛЬ:"); db.ref('users/'+u).update({p}); }
+            if(type === 'ban') db.ref('users/'+u).update({banned: true, online: false});
+            if(type === 'unban') db.ref('users/'+u).update({banned: false});
+            if(type === 'mute') db.ref('users/'+u).update({muted: true});
+            if(type === 'ver') db.ref('users/'+u).update({v: true});
+            alert("ГОТОВО!");
+        }
+
         window.onbeforeunload = () => { if(my.n) db.ref('users/'+my.n).update({online: false}); };
     </script>
 </body>
