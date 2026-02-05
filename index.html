@@ -2,24 +2,63 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NNITRO SYSTEM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NNITRO SYSTEM FIX</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        :root { --main: #ff8c00; --bg: #0b0b0b; --panel: #161616; --text: #eee; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--main); color: var(--text); height: 100vh; overflow: hidden; }
+        body { background: #ff8c00; margin: 0; padding: 0; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; }
+        .auth-card { background: #111; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; background: #222; color: #fff; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; background: #ff8c00; color: #fff; font-weight: bold; cursor: pointer; }
+        #app { display: none; background: #000; width: 100vw; height: 100vh; position: fixed; inset: 0; }
+        .error-msg { color: #ff4444; font-size: 12px; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
 
-        /* ВХОД */
-        #auth { position: fixed; inset: 0; background: var(--main); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .auth-card { background: var(--bg); padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: none; background: #222; color: #fff; font-size: 16px; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 14px; text-transform: uppercase; }
-        .btn-main { background: var(--main); color: #fff; margin-top: 10px; }
+<div id="auth">
+    <div class="auth-card">
+        <h1>NNITRO</h1>
+        <p style="font-size: 12px; opacity: 0.7;">V68 UNIFIED (PC/MOB)</p>
+        <input id="un" placeholder="ЛОГИН">
+        <input id="up" type="password" placeholder="ПАРОЛЬ">
+        <button class="btn" onclick="startApp()">ВОЙТИ / СОЗДАТЬ</button>
+        <div id="err" class="error-msg">Ошибка подключения к базе</div>
+    </div>
+</div>
 
-        /* ГЛАВНЫЙ ЭКРАН */
-        #app { display: none; height: 100vh; flex-direction: row; background: var(--bg); }
+<div id="app">
+    <h2 style="padding: 20px;">Загрузка системы...</h2>
+</div>
+
+<script>
+    // ПРОВЕРЬ ЭТУ ССЫЛКУ! Она должна быть твоя из Firebase Console
+    const firebaseConfig = { 
+        databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com" 
+    };
+
+    try {
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.database();
+    } catch (e) {
+        console.error("Firebase Init Error", e);
+        document.getElementById('err').style.display = 'block';
+        document.getElementById('err').innerText = "Конфиг базы неверный!";
+    }
+
+    async function startApp() {
+        const n = document.getElementById('un').value.trim();
+        const p = document.getElementById('up').value;
+        if (!n || !p) return alert("Введи данные!");
+
+        // Прячем вход, показываем приложение
+        document.getElementById('auth').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
         
-        /* АДМИН ПАНЕЛЬ */
-        #adm-bar { display: none; position: fixed; top: 0; width: 100%; background: #000; z-index: 900; padding: 5px; gap: 5px; overflow-x: auto; border-bottom: 1px solid var(--main); }
+        // Тут логика из предыдущего кода...
+        alert("Входим как " + n);
+    }
+</script>
+</body>
+</html>
