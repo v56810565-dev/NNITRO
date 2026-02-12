@@ -2,253 +2,234 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NNITRO 2026 | REAL-TIME SYSTEM</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-storage-compat.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NNITRO OS</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
         :root {
-            --accent: #00f2ff;
-            --bg: #0a0a0c;
-            --glass: rgba(255, 255, 255, 0.05);
-            --text: #ffffff;
-            --virus-red: #ff0044;
+            --neon: #00ff41; /* Кислотно-зеленый */
+            --bg: #050505;
+            --panel: #0d0d0d;
+            --virus: #ff003c;
         }
 
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; transition: 0.5s; }
-        .hidden { display: none !important; }
-        .glass { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; }
+        * { box-sizing: border-box; font-family: 'JetBrains Mono', monospace; }
+        body { margin: 0; background: var(--bg); color: var(--neon); height: 100vh; overflow: hidden; }
 
-        /* App Layout */
-        #app { display: grid; grid-template-columns: 80px 300px 1fr; height: 100vh; padding: 10px; gap: 10px; }
-
-        /* Sidebar */
-        .sidebar { display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 20px; }
-        .nav-icon { width: 50px; height: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: 0.3s; position: relative; }
-        .nav-icon:hover { background: var(--glass); border-radius: 12px; color: var(--accent); }
-
-        /* Chat List */
-        .chat-list-panel { display: flex; flex-direction: column; overflow: hidden; }
-        .list-header { padding: 15px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--accent); }
-        .list-container { flex: 1; overflow-y: auto; padding: 10px; }
-        .item { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; cursor: pointer; margin-bottom: 5px; border: 1px solid transparent; }
-        .item:hover { background: var(--glass); border-color: var(--accent); }
-        .item.active { background: var(--accent); color: #000; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(45deg, #222, #444); display: flex; align-items: center; justify-content: center; font-size: 12px; }
-
-        /* Chat Window */
-        .chat-window { display: flex; flex-direction: column; }
-        #msg-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .m { max-width: 75%; padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; animation: slideIn 0.2s ease; }
-        .m.in { align-self: flex-start; background: var(--glass); border-bottom-left-radius: 2px; }
-        .m.out { align-self: flex-end; background: var(--accent); color: #000; border-bottom-right-radius: 2px; font-weight: 500; }
+        /* Дизайн чата */
+        #app { display: flex; height: 100vh; border: 2px solid #111; }
         
-        /* Input */
-        .input-bar { padding: 20px; display: flex; gap: 10px; background: rgba(0,0,0,0.2); }
-        .input-bar input { flex: 1; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 10px; color: white; outline: none; }
-        .mic-btn.rec { color: var(--virus-red); animation: pulse 1s infinite; }
+        #sidebar { width: 300px; background: var(--panel); border-right: 1px solid #222; display: flex; flex-direction: column; }
+        #chat-area { flex: 1; display: flex; flex-direction: column; background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); }
 
-        /* VAaD Admin */
-        #vaad-panel { position: fixed; inset: 15%; z-index: 9999; padding: 40px; border: 2px solid gold; background: #000; box-shadow: 0 0 100px rgba(255,215,0,0.2); }
-        .v-bar-bg { width: 100%; height: 10px; background: #222; border-radius: 5px; margin: 10px 0; }
-        #v-progress { height: 100%; width: 0%; background: var(--virus-red); transition: 0.3s; }
+        .header { padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; }
 
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Сообщения */
+        .m { max-width: 80%; padding: 12px; position: relative; border: 1px solid #222; background: rgba(0,0,0,0.5); }
+        .m.out { align-self: flex-end; border-color: var(--neon); background: rgba(0, 255, 65, 0.05); }
+        .m.in { align-self: flex-start; border-color: #444; }
+        .m b { display: block; font-size: 0.7em; margin-bottom: 5px; opacity: 0.6; }
+
+        /* Ввод */
+        .controls { padding: 15px; background: var(--panel); border-top: 1px solid #222; display: flex; gap: 10px; align-items: center; }
+        input { flex: 1; background: #000; border: 1px solid #333; padding: 12px; color: var(--neon); outline: none; }
+        input:focus { border-color: var(--neon); }
+
+        /* Кнопка записи */
+        #mic-btn { 
+            width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--neon); 
+            background: none; color: var(--neon); cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #mic-btn.active { background: var(--virus); border-color: white; color: white; box-shadow: 0 0 15px var(--virus); }
+
+        /* Админка */
+        #admin-modal { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; 
+            display: none; align-items: center; justify-content: center; 
+        }
+        .admin-box { width: 400px; padding: 30px; border: 2px solid gold; background: #000; }
+
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            #sidebar { display: none; }
+            .m { max-width: 90%; }
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
-        <h1 style="color: var(--accent); letter-spacing: 8px; text-shadow: 0 0 20px var(--accent);">NNITRO</h1>
-        <div class="glass" style="padding: 40px; width: 320px; text-align: center;">
-            <input type="text" id="nick" placeholder="Username">
-            <input type="password" id="pass" placeholder="Password">
-            <button onclick="auth()" style="width: 100%; padding: 12px; background: var(--accent); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px;">INITIALIZE</button>
+    <div id="login-screen" style="position:fixed; inset:0; z-index:1000; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <h1 style="font-size: 3em; text-shadow: 0 0 10px var(--neon);">NNITRO-2026</h1>
+        <div style="width: 300px; display:flex; flex-direction:column; gap:10px;">
+            <input type="text" id="u-nick" placeholder="USER_ID">
+            <input type="password" id="u-pass" placeholder="PASSWORD">
+            <button onclick="login()" style="padding:15px; background:var(--neon); color:#000; font-weight:bold; border:none; cursor:pointer;">CONNECT</button>
         </div>
     </div>
 
     <div id="app" class="hidden">
-        <div class="sidebar glass">
-            <div class="nav-icon" title="Чаты" onclick="switchList('direct')">👤</div>
-            <div class="nav-icon" title="Группы" onclick="switchList('groups')">👥</div>
-            <div id="vaad-key" class="nav-icon hidden" onclick="openAdmin()" style="color: gold;">⚡</div>
-            <div style="margin-top: auto;" class="nav-icon" onclick="changeSettings()">⚙️</div>
+        <div id="sidebar">
+            <div class="header">
+                <span id="my-name">ADMIN</span>
+                <button id="adm-btn" class="hidden" onclick="showAdmin(true)" style="background:gold; border:none; cursor:pointer;">VAaD</button>
+            </div>
+            <div style="padding:15px; font-size:0.8em; opacity:0.5;">ACTIVE_CHANNELS:</div>
+            <div style="padding:15px; background:#111; cursor:pointer;"># GLOBAL_MAIN</div>
         </div>
 
-        <div class="chat-list-panel glass">
-            <div class="list-header" id="list-type">Группы</div>
-            <div id="chat-items" class="list-container"></div>
-        </div>
-
-        <div class="chat-window glass">
-            <div id="msg-container"></div>
-            <div class="input-bar">
-                <button class="nav-icon mic-btn" id="mic" onmousedown="startRec()" onmouseup="stopRec()">🎤</button>
-                <input type="text" id="m-inp" placeholder="Type message..." onkeypress="if(event.key==='Enter') send()">
-                <button onclick="send()" style="background: var(--accent); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer;">➤</button>
+        <div id="chat-area">
+            <div class="header">CHANNEL: //GLOBAL_MAIN</div>
+            <div id="messages"></div>
+            <div class="controls">
+                <button id="mic-btn">REC</button>
+                <input type="text" id="msg-inp" placeholder="WAITING FOR INPUT..." onkeypress="if(event.key==='Enter') sendText()">
+                <button onclick="sendText()" style="padding:12px; background:none; border:1px solid var(--neon); color:var(--neon); cursor:pointer;">SEND</button>
             </div>
         </div>
     </div>
 
-    <div id="vaad-panel" class="glass hidden">
-        <h1 style="color: gold; margin-top: 0;">VAaD CONTROL UNIT</h1>
-        <div id="sys-info">Система: Активна</div>
-        <hr style="opacity: 0.1; margin: 20px 0;">
-        <label>VIRUS SPREAD:</label>
-        <div class="v-bar-bg"><div id="v-progress"></div></div>
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <button onclick="runVirus()" style="background: var(--virus-red); color: white; flex: 1; padding: 15px; border: none; cursor: pointer;">DEPLOY VIRUS</button>
-            <button onclick="stopVirus()" style="background: #00ff88; color: black; flex: 1; padding: 15px; border: none; cursor: pointer;">CURE</button>
+    <div id="admin-modal">
+        <div class="admin-box">
+            <h2 style="color:gold;">VAaD SYSTEM OVERRIDE</h2>
+            <div id="virus-status">VIRUS_LEVEL: 0%</div>
+            <button onclick="startVirus()" style="width:100%; padding:15px; background:var(--virus); color:white; border:none; margin-top:10px; cursor:pointer;">EXECUTE VIRUS.EXE</button>
+            <button onclick="showAdmin(false)" style="width:100%; margin-top:10px; background:#333; color:white; border:none; padding:10px; cursor:pointer;">EXIT</button>
         </div>
-        <button onclick="openAdmin(false)" style="margin-top: 20px; background: transparent; color: white; border: 1px solid #444; width: 100%; padding: 10px; cursor: pointer;">CLOSE</button>
     </div>
 
-<script>
-    // --- FIREBASE CONFIG ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyAThHqr7jix2KbL7q9kc3JJ4_dMpn09q-o",
-        authDomain: "nnitro-system.firebaseapp.com",
-        databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com",
-        projectId: "nnitro-system",
-        storageBucket: "nnitro-system.firebasestorage.app",
-        messagingSenderId: "927836043640",
-        appId: "1:927836043640:web:d9b320347c888b1d1f708d",
-        measurementId: "G-8HBHZ3ET4D"
-    };
+    <script>
+        // Твои ключи
+        const firebaseConfig = {
+            apiKey: "AIzaSyAThHqr7jix2KbL7q9kc3JJ4_dMpn09q-o",
+            authDomain: "nnitro-system.firebaseapp.com",
+            databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com",
+            projectId: "nnitro-system",
+            storageBucket: "nnitro-system.firebasestorage.app"
+        };
 
-    firebase.initializeApp(firebaseConfig);
-    const rdb = firebase.database();
-    const storage = firebase.storage();
+        firebase.initializeApp(firebaseConfig);
+        const rdb = firebase.database();
 
-    let myNick = "";
-    let myChat = "Global_Group";
-    let virusInterval;
+        let userNick = "";
+        let mediaRecorder;
+        let audioChunks = [];
 
-    function auth() {
-        myNick = document.getElementById('nick').value;
-        const p = document.getElementById('pass').value;
-        if(!myNick) return alert("Enter Nick");
+        function login() {
+            userNick = document.getElementById('u-nick').value;
+            const pass = document.getElementById('u-pass').value;
+            if(!userNick) return alert("EMPTY ID");
 
-        if(myNick === "VAaD" && p === "zip123") {
-            document.getElementById('vaad-key').classList.remove('hidden');
-        }
-
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('app').classList.remove('hidden');
-
-        switchList('groups');
-        listenMessages();
-        listenVirus();
-    }
-
-    function switchList(type) {
-        const cont = document.getElementById('chat-items');
-        document.getElementById('list-type').innerText = type === 'groups' ? 'Группы' : 'Контакты';
-        cont.innerHTML = "";
-        
-        if(type === 'groups') {
-            cont.innerHTML = `<div class="item active" onclick="setChat('Global_Group')"><div class="avatar">#</div> <b>NNITRO GLOBAL</b></div>`;
-        } else {
-            cont.innerHTML = `<div class="item" onclick="setChat('VAaD_Direct')"><div class="avatar">👑</div> <b>VAaD (Support)</b></div>`;
-        }
-    }
-
-    function setChat(id) {
-        myChat = id;
-        document.querySelectorAll('.item').forEach(i => i.classList.toggle('active', i.innerText.includes(id)));
-        listenMessages();
-    }
-
-    function send() {
-        const text = document.getElementById('m-inp').value;
-        if(!text) return;
-
-        rdb.ref('messages/' + myChat).push({
-            user: myNick,
-            text: text,
-            time: Date.now()
-        });
-        document.getElementById('m-inp').value = "";
-    }
-
-    function listenMessages() {
-        rdb.ref('messages/' + myChat).limitToLast(50).on('value', snap => {
-            const cont = document.getElementById('msg-container');
-            cont.innerHTML = "";
-            snap.forEach(child => {
-                const m = child.val();
-                const side = m.user === myNick ? 'out' : 'in';
-                cont.innerHTML += `<div class="m ${side}"><b>${m.user}</b><br>${m.text}</div>`;
-            });
-            cont.scrollTop = cont.scrollHeight;
-        });
-    }
-
-    // ВИРУС (Realtime Sync)
-    function runVirus() {
-        let v = 0;
-        virusInterval = setInterval(() => {
-            v += 2;
-            rdb.ref('system/virus').set(v);
-            if(v >= 100) clearInterval(virusInterval);
-        }, 1000);
-    }
-
-    function stopVirus() {
-        clearInterval(virusInterval);
-        rdb.ref('system/virus').set(0);
-    }
-
-    function listenVirus() {
-        rdb.ref('system/virus').on('value', snap => {
-            const val = snap.val() || 0;
-            document.getElementById('v-progress').style.width = val + "%";
-            if(val >= 51) {
-                document.body.style.filter = "invert(1) hue-rotate(180deg)";
-                if(val >= 60) document.body.style.opacity = "0.5";
-            } else {
-                document.body.style.filter = "none";
-                document.body.style.opacity = "1";
+            if(userNick === "VAaD" && pass === "zip123") {
+                document.getElementById('adm-btn').classList.remove('hidden');
             }
-        });
-    }
 
-    // ГОЛОСОВЫЕ
-    let rec; let chunks = [];
-    async function startRec() {
-        const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-        rec = new MediaRecorder(stream);
-        rec.start();
-        document.getElementById('mic').classList.add('rec');
-        chunks = [];
-        rec.ondataavailable = e => chunks.push(e.data);
-    }
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('my-name').innerText = userNick;
 
-    async function stopRec() {
-        rec.stop();
-        document.getElementById('mic').classList.remove('rec');
-        rec.onstop = async () => {
-            const blob = new Blob(chunks, {type:'audio/ogg'});
-            const ref = storage.ref().child('audio/'+Date.now()+'.ogg');
-            await ref.put(blob);
-            const url = await ref.getDownloadURL();
-            rdb.ref('messages/'+myChat).push({
-                user: myNick,
-                text: `<audio controls src="${url}" style="width:200px"></audio>`,
+            listenMsgs();
+            listenVirus();
+        }
+
+        // ОТПРАВКА ТЕКСТА
+        function sendText() {
+            const inp = document.getElementById('msg-inp');
+            if(!inp.value) return;
+            rdb.ref('msgs').push({
+                user: userNick,
+                text: inp.value,
+                type: 'text',
                 time: Date.now()
             });
-        };
-    }
+            inp.value = "";
+        }
 
-    function openAdmin(s=true) { document.getElementById('vaad-panel').classList.toggle('hidden', !s); }
-    function changeSettings() {
-        const n = prompt("Новый ник:", myNick);
-        if(n) myNick = n;
-    }
-</script>
+        // РАБОТА С ГОЛОСОМ (ФИКС)
+        const micBtn = document.getElementById('mic-btn');
+
+        micBtn.onmousedown = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    // Конвертируем в Base64 чтобы точно отправилось
+                    const reader = new FileReader();
+                    reader.readAsDataURL(audioBlob);
+                    reader.onloadend = () => {
+                        const base64data = reader.result;
+                        rdb.ref('msgs').push({
+                            user: userNick,
+                            audio: base64data,
+                            type: 'voice',
+                            time: Date.now()
+                        });
+                    };
+                };
+
+                mediaRecorder.start();
+                micBtn.classList.add('active');
+                micBtn.innerText = "LIVE";
+            } catch (err) {
+                alert("МИКРОФОН ЗАБЛОКИРОВАН В БРАУЗЕРЕ!");
+            }
+        };
+
+        micBtn.onmouseup = () => {
+            if(mediaRecorder) {
+                mediaRecorder.stop();
+                micBtn.classList.remove('active');
+                micBtn.innerText = "REC";
+            }
+        };
+
+        // СЛУШАЕМ СООБЩЕНИЯ
+        function listenMsgs() {
+            rdb.ref('msgs').limitToLast(20).on('value', snap => {
+                const box = document.getElementById('messages');
+                box.innerHTML = "";
+                snap.forEach(child => {
+                    const d = child.val();
+                    const side = d.user === userNick ? 'out' : 'in';
+                    let content = d.type === 'text' ? d.text : `<audio controls src="${d.audio}"></audio>`;
+                    box.innerHTML += `<div class="m ${side}"><b>${d.user}</b>${content}</div>`;
+                });
+                box.scrollTop = box.scrollHeight;
+            });
+        }
+
+        // АДМИНКА И ВИРУС
+        function showAdmin(s) { document.getElementById('admin-modal').style.display = s ? 'flex' : 'none'; }
+
+        function startVirus() {
+            let v = 0;
+            const i = setInterval(() => {
+                v += 5;
+                rdb.ref('system/virus').set(v);
+                if(v >= 100) clearInterval(i);
+            }, 500);
+        }
+
+        function listenVirus() {
+            rdb.ref('system/virus').on('value', snap => {
+                const v = snap.val() || 0;
+                document.getElementById('virus-status').innerText = `VIRUS_LEVEL: ${v}%`;
+                if(v >= 51) {
+                    document.body.style.filter = "invert(1) hue-rotate(90deg) blur(1px)";
+                    document.body.style.transform = "skewX(1deg)";
+                }
+            });
+        }
+    </script>
 </body>
 </html>
