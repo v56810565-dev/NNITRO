@@ -3,278 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NNITRO Messenger</title>
-    
+    <title>NNITRO OS</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
     <style>
-        :root {
-            --bg: #ffffff;
-            --panel: #f2f2f7;
-            --text: #000000;
-            --accent: #007aff;
-            --msg-in: #e9e9eb;
-            --msg-out: #007aff;
-            --border: rgba(0,0,0,0.1);
-        }
-
-        .dark-mode {
-            --bg: #000000;
-            --panel: #1c1c1e;
-            --text: #ffffff;
-            --msg-in: #3a3a3c;
-            --msg-out: #0a84ff;
-            --border: rgba(255,255,255,0.1);
-        }
-
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; transition: background 0.3s, filter 0.5s; }
-        body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
-
-        /* ЭКРАН ВХОДА */
-        #auth-screen {
-            position: fixed; inset: 0; z-index: 9999; background: var(--bg);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .auth-card { width: 320px; text-align: center; }
-        .auth-card h1 { font-size: 32px; font-weight: 800; margin-bottom: 20px; letter-spacing: -1px; }
-        input { 
-            width: 100%; padding: 14px; margin: 10px 0; border: none; 
-            background: var(--panel); border-radius: 12px; color: var(--text); outline: none; font-size: 16px;
-        }
-        .btn-connect { 
-            width: 100%; padding: 14px; background: var(--accent); color: white; 
-            border: none; border-radius: 12px; font-weight: 600; cursor: pointer; margin-top: 10px;
-        }
-
-        /* ОСНОВНОЙ ИНТЕРФЕЙС */
-        #app { display: grid; grid-template-columns: 350px 1fr; height: 100vh; }
-        #sidebar { background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        #chat-window { display: flex; flex-direction: column; background: var(--bg); position: relative; }
-
-        .header { 
-            height: 60px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between;
-            border-bottom: 1px solid var(--border); font-weight: 700; font-size: 18px;
-        }
-
-        /* СПИСОК ЧАТОВ */
-        .chat-list { flex: 1; overflow-y: auto; padding: 10px; }
-        .chat-item { 
-            padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 12px; 
-            cursor: pointer; margin-bottom: 5px;
-        }
-        .chat-item:hover { background: var(--panel); }
-        .chat-item.active { background: rgba(0, 122, 255, 0.1); }
-        .chat-avatar { width: 45px; height: 45px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
-
-        /* ОКНО СООБЩЕНИЙ */
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
-        .msg { max-width: 75%; padding: 10px 16px; border-radius: 20px; font-size: 16px; line-height: 1.4; position: relative; }
-        .msg.in { align-self: flex-start; background: var(--msg-in); color: var(--text); border-bottom-left-radius: 4px; }
-        .msg.out { align-self: flex-end; background: var(--msg-out); color: #fff; border-bottom-right-radius: 4px; }
-        .msg b { display: block; font-size: 11px; opacity: 0.5; margin-bottom: 2px; }
-
-        /* ПАНЕЛЬ ВВОДА */
-        .input-bar { padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--border); }
-        .mic-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--panel); cursor: pointer; font-size: 20px; }
-        .mic-btn.active { background: #ff3b30; color: white; animation: pulse 1s infinite; }
-
-        /* СКРЫТАЯ АДМИНКА */
-        #vaad-panel {
-            position: fixed; top: 70px; right: 20px; width: 260px; background: var(--panel);
-            border-radius: 16px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            z-index: 5000; display: none; border: 1px solid var(--accent);
-        }
-
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        :root { --bg: #ffffff; --panel: #f2f2f7; --text: #000; --accent: #007aff; --border: rgba(0,0,0,0.1); }
+        .dark-mode { --bg: #000; --panel: #1c1c1e; --text: #fff; --border: rgba(255,255,255,0.1); }
         
-        @media (max-width: 768px) { #app { grid-template-columns: 1fr; } #sidebar { display: none; } }
+        * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+        
+        #app { display: grid; grid-template-columns: 320px 1fr; height: 100vh; }
+        
+        /* Sidebar */
+        #sidebar { background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .search-area { padding: 15px; border-bottom: 1px solid var(--border); }
+        .search-area input { width: 100%; padding: 10px; border-radius: 10px; border: none; background: var(--panel); color: var(--text); }
+        
+        .list-items { flex: 1; overflow-y: auto; }
+        .item { padding: 12px 15px; display: flex; align-items: center; gap: 10px; cursor: pointer; border-bottom: 1px solid var(--border); }
+        .item:hover { background: var(--panel); }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .online-dot { width: 10px; height: 10px; background: #34c759; border-radius: 50%; border: 2px solid var(--bg); position: absolute; bottom: 0; right: 0; }
+
+        /* Chat */
+        #chat { display: flex; flex-direction: column; background: var(--bg); }
+        .chat-header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .m { max-width: 70%; padding: 10px 15px; border-radius: 18px; font-size: 15px; }
+        .m.in { align-self: flex-start; background: var(--panel); }
+        .m.out { align-self: flex-end; background: var(--accent); color: #fff; }
+
+        /* Modals */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: var(--bg); padding: 25px; border-radius: 20px; width: 300px; text-align: center; }
+        .btn { width: 100%; padding: 12px; margin-top: 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-blue { background: var(--accent); color: #white; }
+        
+        #vaad-admin { position: fixed; right: 20px; top: 70px; width: 350px; background: var(--bg); border: 1px solid var(--accent); border-radius: 15px; padding: 20px; display: none; z-index: 2000; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="auth-screen">
-        <div class="auth-card">
-            <h1>NNITRO</h1>
-            <input type="text" id="u-nick" placeholder="Имя пользователя">
-            <input type="password" id="u-pass" placeholder="Пароль">
-            <button class="btn-connect" onclick="connect()">ПРОДОЛЖИТЬ</button>
+    <div id="auth-screen" style="position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center;">
+        <div style="width:300px; text-align:center;">
+            <h1 style="font-size:40px; margin-bottom:20px;">NNITRO</h1>
+            <input type="text" id="u-nick" placeholder="Username" style="width:100%; padding:15px; border-radius:12px; border:1px solid var(--border);">
+            <input type="password" id="u-pass" placeholder="Password (for VAaD)" style="width:100%; padding:15px; border-radius:12px; border:1px solid var(--border); margin-top:10px;">
+            <button onclick="login()" class="btn" style="background:var(--accent); color:white;">ENTER</button>
         </div>
     </div>
 
     <div id="app" class="hidden">
         <div id="sidebar">
-            <div class="header">Чаты</div>
-            <div class="chat-list">
-                <div class="chat-item active" onclick="switchChat('global')">
-                    <div class="chat-avatar" style="background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800;">G</div>
-                    <div><b>Глобальный чат</b><br><small style="opacity:0.6">NNITRO Community</small></div>
+            <div class="search-area">
+                <input type="text" id="search-inp" placeholder="Поиск людей..." onkeyup="searchUsers(this.value)">
+            </div>
+            <div id="contacts-list" class="list-items">
+                <div class="item" onclick="openChat('global', 'Глобальный чат')">
+                    <div class="avatar" style="background:#000;">G</div>
+                    <b>Глобальный чат</b>
                 </div>
             </div>
-            <div style="padding: 20px; border-top: 1px solid var(--border);">
-                <button onclick="document.body.classList.toggle('dark-mode')" style="width: 100%; padding: 10px; border-radius: 10px; border: none; background: var(--panel); color: var(--text); cursor: pointer;">🌓 Тема</button>
-            </div>
+            <div style="padding:15px;"><button class="btn" onclick="showGroupModal()">+ Создать группу</button></div>
         </div>
 
-        <div id="chat-window">
-            <div class="header">
-                <span id="current-chat-name">Глобальный чат</span>
-                <button id="vaad-gear" class="hidden" onclick="toggleAdmin()" style="background: none; border: none; font-size: 20px; cursor: pointer;">⚙️</button>
+        <div id="chat">
+            <div class="chat-header">
+                <span id="chat-title">Выберите чат</span>
+                <button id="adm-btn" class="hidden" onclick="toggleVAaD()" style="background:none; border:none; font-size:20px; cursor:pointer;">⚙️</button>
             </div>
             <div id="messages"></div>
-            <div class="input-bar">
-                <button class="mic-btn" id="mic-btn" onmousedown="startVoice()" onmouseup="stopVoice()">🎤</button>
-                <input type="text" id="msg-input" placeholder="Cообщение..." onkeypress="if(event.key==='Enter') sendMsg()">
-                <button onclick="sendMsg()" style="background: none; border: none; color: var(--accent); font-weight: 700; cursor: pointer;">ОТПРАВИТЬ</button>
+            <div style="padding:15px; display:flex; gap:10px; border-top:1px solid var(--border);">
+                <button onclick="startVoice()" onmouseup="stopVoice()" id="mic" style="border:none; background:var(--panel); border-radius:50%; width:45px; height:45px; cursor:pointer;">🎤</button>
+                <input type="text" id="m-inp" placeholder="Сообщение..." style="flex:1; padding:12px; border-radius:12px; border:none; background:var(--panel); color:var(--text);">
+                <button onclick="send()" style="border:none; background:none; color:var(--accent); font-weight:bold; cursor:pointer;">SEND</button>
             </div>
         </div>
     </div>
 
-    <div id="vaad-panel">
-        <h3 style="margin-top:0">Система VAaD</h3>
-        <p style="font-size:12px; opacity:0.7">Управление пандемией:</p>
-        <div style="background:#ddd; height:8px; border-radius:4px; overflow:hidden; margin-bottom:10px;">
-            <div id="v-progress" style="width:0%; height:100%; background:#ff3b30; transition: 0.3s;"></div>
+    <div id="user-modal" class="modal" onclick="closeModals()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="avatar" id="m-avatar" style="width:80px; height:80px; margin:0 auto 15px; font-size:30px;">?</div>
+            <h2 id="m-username">User</h2>
+            <button class="btn btn-blue" onclick="startPrivate()">Написать ЛС</button>
+            <button class="btn" style="background:#ff3b30; color:white;" onclick="blockUser()">Заблокировать</button>
         </div>
-        <p style="font-size:11px;">Заражение: <span id="v-status">0</span>%</p>
-        <button class="btn-connect" onclick="runRoulette()" style="font-size:12px; padding:8px;">🎰 ЗАПУСТИТЬ РУЛЕТКУ</button>
-        <button class="btn-connect" style="background:#555; font-size:12px; padding:8px;" onclick="toggleAdmin()">ЗАКРЫТЬ</button>
     </div>
 
-    <script>
-        // --- КОНФИГУРАЦИЯ FIREBASE ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAThHqr7jix2KbL7q9kc3JJ4_dMpn09q-o",
-            authDomain: "nnitro-system.firebaseapp.com",
-            databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com",
-            projectId: "nnitro-system",
-            storageBucket: "nnitro-system.firebasestorage.app"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const rdb = firebase.database();
+    <div id="vaad-admin">
+        <h3>VAaD CONTROL PANEL</h3>
+        <p>Вирус: <span id="v-val">0</span>%</p>
+        <button class="btn" onclick="runRoulette()" style="background:red; color:white;">ЗАПУСТИТЬ РУЛЕТКУ</button>
+        <hr>
+        <h4>Юзеры в базе:</h4>
+        <div id="admin-user-list" style="font-size:12px; text-align:left;"></div>
+        <button class="btn" onclick="toggleVAaD()">Закрыть</button>
+    </div>
 
-        let myNick = "";
-        let currentChat = "global";
-        let mediaRecorder;
-        let chunks = [];
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAThHqr7jix2KbL7q9kc3JJ4_dMpn09q-o",
+        authDomain: "nnitro-system.firebaseapp.com",
+        databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com",
+        projectId: "nnitro-system"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const rdb = firebase.database();
 
-        function connect() {
-            myNick = document.getElementById('u-nick').value.trim();
-            const pass = document.getElementById('u-pass').value.trim();
-            if(!myNick) return alert("Введите имя!");
+    let myNick = "";
+    let currentChatId = "";
+    let selectedUser = "";
+    let mediaRecorder, chunks = [];
 
-            // Проверка на админа
-            if(myNick === "VAaD" && pass === "zip123") {
-                document.getElementById('vaad-gear').classList.remove('hidden');
-            }
+    function login() {
+        myNick = document.getElementById('u-nick').value.trim();
+        let p = document.getElementById('u-pass').value;
+        if(!myNick) return;
 
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
+        if(myNick === "VAaD" && p === "zip123") document.getElementById('adm-btn').classList.remove('hidden');
 
-            rdb.ref('users/' + myNick).set({ status: 'online' });
-            listenMsgs();
-            listenVirus();
-        }
+        rdb.ref('users/' + myNick).set({ lastSeen: Date.now(), online: true });
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app').classList.remove('hidden');
+        
+        loadSidebar();
+        listenVirus();
+    }
 
-        function sendMsg() {
-            const inp = document.getElementById('msg-input');
-            if(!inp.value) return;
-
-            // Тихая проверка зараженного
-            rdb.ref('system/infected_user').once('value', s => {
-                if(s.val() === myNick) {
-                    rdb.ref('system/virus').transaction(v => (v || 0) + 0.5);
+    function loadSidebar() {
+        rdb.ref('users').on('value', snap => {
+            const list = document.getElementById('contacts-list');
+            list.innerHTML = `<div class="item" onclick="openChat('global', 'Глобальный чат')"><div class="avatar" style="background:#000;">G</div><b>Глобальный чат</b></div>`;
+            snap.forEach(u => {
+                if(u.key !== myNick) {
+                    list.innerHTML += `
+                        <div class="item" onclick="showProfile('${u.key}')">
+                            <div class="avatar">${u.key[0]}</div>
+                            <div>
+                                <b>${u.key}</b><br>
+                                <small>${u.val().online ? '● online' : 'offline'}</small>
+                            </div>
+                        </div>`;
                 }
             });
+        });
+    }
 
-            rdb.ref('msgs/' + currentChat).push({
-                user: myNick,
-                text: inp.value,
-                type: 'text',
-                time: Date.now()
+    function showProfile(nick) {
+        selectedUser = nick;
+        document.getElementById('m-username').innerText = nick;
+        document.getElementById('m-avatar').innerText = nick[0];
+        document.getElementById('user-modal').style.display = 'flex';
+    }
+
+    function startPrivate() {
+        const id = myNick < selectedUser ? `${myNick}_${selectedUser}` : `${selectedUser}_${myNick}`;
+        openChat(id, `ЛС: ${selectedUser}`);
+        closeModals();
+    }
+
+    function openChat(id, title) {
+        currentChatId = id;
+        document.getElementById('chat-title').innerText = title;
+        listenMessages();
+    }
+
+    function send() {
+        const val = document.getElementById('m-inp').value;
+        if(!val || !currentChatId) return;
+        rdb.ref('msgs/' + currentChatId).push({ user: myNick, text: val, time: Date.now() });
+        document.getElementById('m-inp').value = "";
+    }
+
+    function listenMessages() {
+        rdb.ref('msgs/' + currentChatId).limitToLast(50).on('value', snap => {
+            const box = document.getElementById('messages');
+            box.innerHTML = "";
+            snap.forEach(c => {
+                const d = c.val();
+                box.innerHTML += `<div class="m ${d.user === myNick ? 'out' : 'in'}"><b>${d.user}</b><br>${d.text}</div>`;
             });
-            inp.value = "";
-        }
+            box.scrollTop = box.scrollHeight;
+        });
+    }
 
-        function listenMsgs() {
-            rdb.ref('msgs/' + currentChat).limitToLast(50).on('value', snap => {
-                const box = document.getElementById('messages');
-                box.innerHTML = "";
-                snap.forEach(child => {
-                    const d = child.val();
-                    const side = d.user === myNick ? 'out' : 'in';
-                    const content = d.type === 'text' ? d.text : `<audio controls src="${d.data}"></audio>`;
-                    box.innerHTML += `<div class="msg ${side}"><b>${d.user}</b>${content}</div>`;
-                });
-                box.scrollTop = box.scrollHeight;
+    function toggleVAaD() {
+        const p = document.getElementById('vaad-admin');
+        const show = p.style.display !== 'block';
+        p.style.display = show ? 'block' : 'none';
+        if(show) {
+            rdb.ref('users').once('value', snap => {
+                let html = "";
+                snap.forEach(u => { html += `<div>${u.val().online ? '🟢' : '⚪'} ${u.key}</div>`; });
+                document.getElementById('admin-user-list').innerHTML = html;
             });
         }
+    }
 
-        function listenVirus() {
-            rdb.ref('system/virus').on('value', s => {
-                const v = s.val() || 0;
-                if(myNick === "VAaD") {
-                    document.getElementById('v-progress').style.width = v + "%";
-                    document.getElementById('v-status').innerText = Math.floor(v);
-                }
-                
-                // Скрытая деградация интерфейса
-                if(v >= 40) document.body.style.filter = `saturate(${1 + v/100})`;
-                if(v >= 51) {
-                    document.body.style.filter = "invert(1) hue-rotate(180deg) contrast(1.1)";
-                    if(myNick !== "VAaD") {
-                        document.getElementById('current-chat-name').innerText = "FATAL ERROR: VIRUS_DETECTED";
-                    }
-                }
-            });
-        }
+    function listenVirus() {
+        rdb.ref('system/virus').on('value', s => {
+            const v = s.val() || 0;
+            document.getElementById('v-val').innerText = Math.floor(v);
+            if(v >= 51) document.body.style.filter = "invert(1) hue-rotate(180deg)";
+        });
+    }
 
-        // --- ГОЛОСОВЫЕ СООБЩЕНИЯ ---
-        async function startVoice() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                chunks = [];
-                mediaRecorder.ondataavailable = e => chunks.push(e.data);
-                mediaRecorder.start();
-                document.getElementById('mic-btn').classList.add('active');
-            } catch(e) { alert("Микрофон недоступен"); }
-        }
+    function runRoulette() {
+        rdb.ref('users').once('value', s => {
+            const users = Object.keys(s.val());
+            const v = users[Math.floor(Math.random()*users.length)];
+            rdb.ref('system/infected_user').set(v);
+            alert("Нулевой пациент: " + v);
+        });
+    }
 
-        function stopVoice() {
-            if(!mediaRecorder || mediaRecorder.state === 'inactive') return;
-            mediaRecorder.stop();
-            document.getElementById('mic-btn').classList.remove('active');
-            mediaRecorder.onstop = () => {
-                const reader = new FileReader();
-                reader.readAsDataURL(new Blob(chunks, { type: 'audio/webm' }));
-                reader.onloadend = () => {
-                    rdb.ref('msgs/' + currentChat).push({
-                        user: myNick,
-                        data: reader.result,
-                        type: 'voice',
-                        time: Date.now()
-                    });
-                };
+    async function startVoice() {
+        const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+        mediaRecorder = new MediaRecorder(stream);
+        chunks = [];
+        mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        mediaRecorder.start();
+    }
+    function stopVoice() {
+        mediaRecorder.stop();
+        mediaRecorder.onstop = () => {
+            const reader = new FileReader();
+            reader.readAsDataURL(new Blob(chunks));
+            reader.onloadend = () => {
+                rdb.ref('msgs/'+currentChatId).push({ user:myNick, text:`<audio controls src="${reader.result}"></audio>`, time:Date.now() });
             };
-        }
+        };
+    }
 
-        function toggleAdmin() {
-            const p = document.getElementById('vaad-panel');
-            p.style.display = (p.style.display === 'block') ? 'none' : 'block';
-        }
-
-        function runRoulette() {
-            rdb.ref('msgs/global').once('value', s => {
-                const users = [];
-                s.forEach(m => { if(!users.includes(m.val().user)) users.push(m.val().user); });
-                if(users.length === 0) return alert("Нет кандидатов!");
-                const victim = users[Math.floor(Math.random() * users.length)];
-                rdb.ref('system/infected_user').set(victim);
-                alert("Объект " + victim + " заражен. Тихая фаза началась.");
-            });
-        }
-    </script>
+    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+</script>
 </body>
 </html>
