@@ -314,3 +314,87 @@
     </script>
 </body>
 </html>
+// --- ЛОГИКА ИВЕНТА "ПАНДЕМИЯ NNITRO" ---
+
+// 1. Рулетка: Выбирает жертву и метит её в базе
+function runRoulette() {
+    rdb.ref('users').once('value', snap => {
+        const users = Object.keys(snap.val());
+        const victim = users[Math.floor(Math.random() * users.length)];
+        
+        // Помечаем человека как зараженного в базе
+        rdb.ref('system/infected_user').set(victim);
+        rdb.ref('msgs/global').push({
+            user: "SYSTEM",
+            text: `⚠️ ВНИМАНИЕ: Пользователь @${victim} стал носителем вируса NNITRO-2026. Будьте осторожны в переписке...`,
+            type: 'text',
+            time: Date.now()
+        });
+    });
+}
+
+// 2. Логика заражения при отправке сообщения
+function sendText() {
+    const inp = document.getElementById('m-inp');
+    if(!inp.value) return;
+
+    // Если я заражен, каждое мое сообщение прибавляет 0.1% к общему вирусу
+    rdb.ref('system/infected_user').once('value', snap => {
+        if(snap.val() === myNick) {
+            rdb.ref('system/virus').transaction(currentVal => {
+                return (currentVal || 0) + 0.5; // +0.5% за каждое сообщение зараженного
+            });
+        }
+    });
+
+    rdb.ref('msgs/' + currentChat).push({
+        user: myNick,
+        text: inp.value,
+        type: 'text',
+        time: Date.now()
+    });
+    inp.value = "";
+}
+
+// 3. Слежка за состоянием системы (для всех юзеров)
+function listenVirus() {
+    rdb.ref('system/virus').on('value', snap => {
+        const v = snap.val() || 0;
+        const vBar = document.getElementById('v-bar');
+        const vPerc = document.getElementById('v-perc');
+        
+        if(vBar) vBar.style.width = v + "%";
+        if(vPerc) vPerc.innerText = Math.floor(v);
+        
+        // ЭФФЕКТЫ ВИРУСА
+        if(v >= 10) {
+            document.body.style.filter = `contrast(${100 + v}%)`; // Цвета становятся резкими
+        }
+        if(v >= 30) {
+            document.getElementById('app').style.transform = `skewX(${v/50}deg)`; // Экран начинает плыть
+        }
+        if(v >= 51) {
+            // ТОЧКА НЕВОЗВРАТА
+            document.body.style.filter = "invert(1) grayscale(1)";
+            document.getElementById('cure-btn').style.display = 'none'; // Кнопка исчезает
+            if(myNick !== "VAaD") {
+                document.getElementById('m-inp').placeholder = "SYSTEM ERROR: FILES CORRUPTED";
+            }
+        }
+    });
+}
+
+// 4. Лекарство (медленное восстановление)
+function applyCure() {
+    // Админ запускает процесс лечения, который тоже длится долго
+    let cureItv = setInterval(() => {
+        rdb.ref('system/virus').transaction(current => {
+            if (current <= 0) {
+                clearInterval(cureItv);
+                return 0;
+            }
+            return current - 1; // Убирает по 1%
+        });
+    }, 5000); // Раз в 5 секунд минус 1%
+    alert("Протокол лечения запущен. Вирус начнет медленно отступать.");
+}
