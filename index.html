@@ -314,87 +314,86 @@
     </script>
 </body>
 </html>
-// --- ЛОГИКА ИВЕНТА "ПАНДЕМИЯ NNITRO" ---
+// --- СКРЫТЫЙ ИВЕНТ "ТИХАЯ ПАНДЕМИЯ" ---
 
-// 1. Рулетка: Выбирает жертву и метит её в базе
+// 1. Рулетка: Выбирает жертву ТИХО
 function runRoulette() {
     rdb.ref('users').once('value', snap => {
-        const users = Object.keys(snap.val());
+        const users = Object.keys(snap.val() || {});
+        if(users.length === 0) return alert("Нет пользователей в сети");
+        
         const victim = users[Math.floor(Math.random() * users.length)];
         
-        // Помечаем человека как зараженного в базе
+        // Записываем ID зараженного скрытно
         rdb.ref('system/infected_user').set(victim);
-        rdb.ref('msgs/global').push({
-            user: "SYSTEM",
-            text: `⚠️ ВНИМАНИЕ: Пользователь @${victim} стал носителем вируса NNITRO-2026. Будьте осторожны в переписке...`,
-            type: 'text',
-            time: Date.now()
-        });
+        
+        // Только админу в консоль или алертом
+        alert("ОБЪЕКТ ВЫБРАН: " + victim + ". Он не знает, что заражен.");
     });
 }
 
-// 2. Логика заражения при отправке сообщения
+// 2. Скрытая передача вируса при отправке сообщений
 function sendText() {
     const inp = document.getElementById('m-inp');
     if(!inp.value) return;
 
-    // Если я заражен, каждое мое сообщение прибавляет 0.1% к общему вирусу
-    rdb.ref('system/infected_user').once('value', snap => {
-        if(snap.val() === myNick) {
-            rdb.ref('system/virus').transaction(currentVal => {
-                return (currentVal || 0) + 0.5; // +0.5% за каждое сообщение зараженного
-            });
-        }
-    });
-
-    rdb.ref('msgs/' + currentChat).push({
+    const messageData = {
         user: myNick,
         text: inp.value,
         type: 'text',
         time: Date.now()
+    };
+
+    // Проверяем, является ли текущий пользователь "распространителем"
+    rdb.ref('system/infected_user').once('value', snap => {
+        const infectedID = snap.val();
+        
+        if(infectedID === myNick) {
+            // Каждое сообщение зараженного тихо двигает счетчик вируса вверх
+            rdb.ref('system/virus').transaction(currentVal => {
+                return (currentVal || 0) + 0.4; // +0.4% за каждое сообщение
+            });
+        }
     });
+
+    rdb.ref('msgs/' + currentChat).push(messageData);
     inp.value = "";
 }
 
-// 3. Слежка за состоянием системы (для всех юзеров)
+// 3. Слежка за вирусом (эффекты проявляются постепенно)
 function listenVirus() {
     rdb.ref('system/virus').on('value', snap => {
         const v = snap.val() || 0;
+        
+        // Обновляем шкалу ТОЛЬКО если мы админ
         const vBar = document.getElementById('v-bar');
         const vPerc = document.getElementById('v-perc');
-        
-        if(vBar) vBar.style.width = v + "%";
-        if(vPerc) vPerc.innerText = Math.floor(v);
-        
-        // ЭФФЕКТЫ ВИРУСА
-        if(v >= 10) {
-            document.body.style.filter = `contrast(${100 + v}%)`; // Цвета становятся резкими
+        if(myNick === "VAaD") {
+            if(vBar) vBar.style.width = v + "%";
+            if(vPerc) vPerc.innerText = Math.floor(v);
         }
-        if(v >= 30) {
-            document.getElementById('app').style.transform = `skewX(${v/50}deg)`; // Экран начинает плыть
+        
+        // Глобальные визуальные глюки (видят все, но не знают причину)
+        if(v >= 20) {
+            // Легкое дрожание текста иногда
+            document.body.style.textShadow = v > 40 ? `1px 0px 2px rgba(255,0,0,0.5)` : 'none';
         }
+        
+        if(v >= 40) {
+            // Искажение цветов (насыщенность растет)
+            document.body.style.filter = `saturate(${1 + (v/100)}) brightness(${1 - (v/500)})`;
+        }
+        
         if(v >= 51) {
-            // ТОЧКА НЕВОЗВРАТА
-            document.body.style.filter = "invert(1) grayscale(1)";
-            document.getElementById('cure-btn').style.display = 'none'; // Кнопка исчезает
+            // ФИНАЛЬНАЯ СТАДИЯ: Полный крах системы
+            document.body.style.filter = "invert(1) hue-rotate(120deg) contrast(1.2)";
+            document.body.style.pointerEvents = "none"; // Блокируем интерфейс (опционально)
+            
+            // Если мы не админ, пишем системную ошибку вместо чата
             if(myNick !== "VAaD") {
-                document.getElementById('m-inp').placeholder = "SYSTEM ERROR: FILES CORRUPTED";
+                document.getElementById('chat-title').innerText = "CRITICAL SYSTEM FAILURE";
+                document.getElementById('messages').innerHTML = "<h1 style='color:red; text-align:center; margin-top:50px;'>FATAL ERROR 0x0026: DISK CORRUPTED</h1>";
             }
         }
     });
-}
-
-// 4. Лекарство (медленное восстановление)
-function applyCure() {
-    // Админ запускает процесс лечения, который тоже длится долго
-    let cureItv = setInterval(() => {
-        rdb.ref('system/virus').transaction(current => {
-            if (current <= 0) {
-                clearInterval(cureItv);
-                return 0;
-            }
-            return current - 1; // Убирает по 1%
-        });
-    }, 5000); // Раз в 5 секунд минус 1%
-    alert("Протокол лечения запущен. Вирус начнет медленно отступать.");
 }
