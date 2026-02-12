@@ -2,252 +2,380 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>NNITRO 2026 PRESTIGE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> РЕГИСТРАЦИЯ NNITRO v2026.4.1</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
     <style>
-        :root { --main: #ff6600; --bg: #2b2b2b; --side: #383838; --text: #f0f0f0; --msg: #404040; }
+        :root {
+            --m: #ff6600; --bg: #3a3a3a; --p: #2d2d2d; --t: #f0f0f0;
+            --i: #4a4a4a; --adm: #ff0000; --vip: #ffd700;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; }
+        body { background: var(--bg); color: var(--t); height: 100vh; display: flex; overflow: hidden; }
+
+        /* --- AUTH LAYER (MAX PROTECTION) --- */
+        #auth_gate {
+            position: fixed; inset: 0; background: var(--bg); z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-card {
+            background: var(--p); padding: 40px; border-radius: 15px; width: 400px;
+            border: 2px solid var(--m); box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            text-align: center;
+        }
+        .gate-card h1 { font-size: 28px; color: var(--m); letter-spacing: 4px; margin-bottom: 20px; }
+        .gate-card input {
+            width: 100%; padding: 14px; margin: 10px 0; background: #1a1a1a;
+            border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 14px;
+        }
+        .gate-card .b {
+            width: 100%; padding: 15px; border: none; background: var(--m);
+            color: #fff; font-weight: bold; cursor: pointer; border-radius: 8px;
+            margin-top: 15px; transition: 0.3s;
+        }
+        .gate-card .b:hover { filter: brightness(1.2); transform: scale(1.02); }
+
+        /* --- MAIN INTERFACE --- */
+        #main_ui { display: none; width: 100%; height: 100vh; flex-direction: row; }
         
-        /* AUTH */
-        #auth { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
-        .auth-card { background: var(--side); padding: 35px; border-radius: 10px; width: 350px; border-top: 4px solid var(--main); box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
-        input { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #444; color: #fff; border-radius: 5px; }
-        .btn { width: 100%; padding: 12px; border: none; background: var(--main); color: #fff; font-weight: bold; cursor: pointer; border-radius: 5px; text-transform: uppercase; }
-
-        /* UI */
-        #app { display: none; width: 100%; height: 100vh; flex-direction: row; }
-        .sidebar { width: 320px; background: var(--side); border-right: 1px solid #222; display: flex; flex-direction: column; }
-        .chat-zone { flex: 1; display: flex; flex-direction: column; background: #333; }
+        /* SIDEBAR */
+        .sidebar { width: 350px; background: var(--p); border-right: 3px solid #222; display: flex; flex-direction: column; }
         
-        /* TABS */
-        .tabs { display: flex; background: #222; border-bottom: 1px solid #111; }
-        .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-size: 11px; font-weight: bold; opacity: 0.5; }
-        .tab.active { opacity: 1; color: var(--main); border-bottom: 2px solid var(--main); }
+        .admin-controls {
+            display: none; background: #1a1a1a; padding: 10px; flex-wrap: wrap; gap: 5px;
+            border-bottom: 2px solid var(--adm);
+        }
+        .a-btn {
+            font-size: 10px; padding: 5px 8px; background: #333; color: #fff;
+            border: 1px solid var(--adm); border-radius: 3px; cursor: pointer;
+        }
 
-        /* LIST */
-        .list { flex: 1; overflow-y: auto; }
-        .item { padding: 12px 15px; border-bottom: 1px solid #444; cursor: pointer; display: flex; align-items: center; gap: 12px; }
-        .item:hover { background: #444; }
-        .ava { width: 38px; height: 38px; background: #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 2px solid #666; }
+        .profile-strip {
+            padding: 20px; background: #222; border-bottom: 1px solid #111;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .profile-strip h3 { font-size: 18px; color: var(--m); }
+        .p-actions { display: flex; gap: 10px; margin-top: 5px; }
+        .p-btn { font-size: 9px; background: #444; border: none; color: #ccc; padding: 4px 8px; border-radius: 3px; cursor: pointer; }
 
-        /* MESSAGES */
-        .msgs { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-        .m { max-width: 70%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.4; position: relative; }
-        .m.in { background: var(--msg); align-self: flex-start; border-bottom-left-radius: 2px; }
-        .m.out { background: var(--main); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .m b { display: block; font-size: 10px; margin-bottom: 4px; opacity: 0.8; }
+        .search-area { padding: 15px; background: #252525; }
+        .search-area input { background: #111; border: 1px solid #444; color: #fff; padding: 8px; width: 100%; border-radius: 20px; }
 
-        /* ADMIN & SETTINGS */
-        #adm-menu { display: none; padding: 10px; background: #1a1a1a; border-bottom: 1px solid var(--main); flex-wrap: wrap; gap: 5px; }
-        .adm-btn { font-size: 9px; padding: 4px 6px; background: #333; border: 1px solid var(--main); color: #fff; cursor: pointer; }
+        .tabs { display: flex; background: #1a1a1a; border-bottom: 1px solid #333; }
+        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-size: 12px; font-weight: bold; opacity: 0.5; }
+        .tab.active { opacity: 1; color: var(--m); background: var(--p); border-bottom: 2px solid var(--m); }
 
-        .footer { padding: 15px; background: var(--side); display: flex; gap: 10px; align-items: center; }
-        .mic { background: none; border: none; font-size: 22px; cursor: pointer; }
-        .recording { color: #f00; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.3; } }
+        .list-container { flex: 1; overflow-y: auto; }
+        .u-item {
+            padding: 15px; border-bottom: 1px solid #333; cursor: pointer;
+            display: flex; align-items: center; gap: 15px; transition: 0.2s;
+        }
+        .u-item:hover { background: var(--i); }
+        .u-item .status { width: 10px; height: 10px; border-radius: 50%; background: #555; }
+        .u-item .status.online { background: #00ff00; box-shadow: 0 0 8px #00ff00; }
+        .ava-circle {
+            width: 45px; height: 45px; background: #555; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
+            border: 2px solid #666; color: #fff;
+        }
+
+        /* CHAT WINDOW */
+        .chat-window { flex: 1; display: flex; flex-direction: column; background: #333; }
+        .chat-header {
+            padding: 20px; background: #222; border-bottom: 1px solid #111;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-header h2 { font-size: 16px; color: var(--m); }
+
+        .messages-area { flex: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
+        .msg { max-width: 65%; padding: 12px 16px; border-radius: 15px; font-size: 14px; position: relative; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .msg.in { background: #4a4a4a; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg.out { background: var(--m); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg b { display: block; font-size: 10px; margin-bottom: 5px; opacity: 0.8; text-transform: uppercase; }
+        
+        /* FIXED AUDIO PLAYER */
+        .audio-msg { width: 220px; height: 35px; margin-top: 8px; display: block; filter: invert(0.9); }
+
+        .chat-footer { padding: 20px; background: var(--p); border-top: 1px solid #111; display: flex; gap: 15px; align-items: center; }
+        .mic-box { font-size: 26px; cursor: pointer; transition: 0.3s; }
+        .mic-box:hover { transform: scale(1.2); }
+        .mic-active { color: #ff0000; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        .input-wrap { flex: 1; position: relative; }
+        .input-wrap input { width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #444; color: #fff; border-radius: 8px; }
+
+        .send-btn { background: var(--m); color: #fff; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="auth">
-    <div class="auth-card">
-        <h2 style="text-align:center; color:var(--main); margin-bottom:15px;">NNITRO 2026</h2>
-        <input id="a_key" placeholder="ACCESS CODE (NNITRO-2026)">
-        <input id="a_login" placeholder="LOGIN">
-        <input id="a_pass" type="password" placeholder="PASSWORD">
-        <button class="btn" onclick="auth()">ENTER SYSTEM</button>
+    <div id="auth_gate">
+        <div class="gate-card">
+            <h1>NNITRO-2026</h1>
+            <input id="key_code" placeholder="ENTER SYSTEM SECRET CODE">
+            <input id="login_id" placeholder="USER IDENTITY">
+            <input id="login_pw" type="password" placeholder="PASSWORD">
+            <button class="b" onclick="attemptAccess()">INITIATE SEQUENCE</button>
+            <div style="margin-top: 20px; font-size: 10px; color: #555;">ADMINS: VAaD / IFRAKOBBI</div>
+        </div>
     </div>
-</div>
 
-<div id="app">
-    <aside class="sidebar">
-        <div id="adm-menu">
-            <button class="adm-btn" onclick="adminBan(10)">BAN 10M</button>
-            <button class="adm-btn" onclick="adminBan(30)">BAN 30M</button>
-            <button class="adm-btn" onclick="adminBan(60)">BAN 1H</button>
-            <button class="adm-btn" onclick="adminBan(99999)">PERM</button>
-            <button class="adm-btn" onclick="adminUnban()" style="border-color:lime">UNBAN</button>
-            <button class="adm-btn" onclick="adminClear()" style="border-color:red">CLEAR</button>
-        </div>
-        <div style="padding:15px; background:#222; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <b id="my_nick" onclick="toggleAdm()" style="cursor:pointer">---</b><br>
-                <small onclick="changeNick()" style="font-size:9px; color:var(--main); cursor:pointer;">[ИЗМЕНИТЬ НИК]</small>
+    <div id="main_ui">
+        <aside class="sidebar">
+            <div id="admin_overlay" class="admin-controls">
+                <button class="a-btn" onclick="sysBan(15)">BAN 15M</button>
+                <button class="a-btn" onclick="sysBan(60)">BAN 1H</button>
+                <button class="a-btn" onclick="sysBan(1440)">BAN 24H</button>
+                <button class="a-btn" onclick="sysBan(9999999)">PERMANENT</button>
+                <button class="a-btn" onclick="sysUnban()" style="border-color: #0f0;">RELEASE</button>
+                <button class="a-btn" onclick="sysClear()" style="border-color: #f0f;">WIPE DATA</button>
             </div>
-            <button onclick="blockUser()" style="font-size:9px; background:none; border:1px solid #555; color:#aaa; padding:2px;">BLOCK</button>
-        </div>
-        <div class="tabs">
-            <div class="tab active" onclick="setTab('group')">ГРУППЫ</div>
-            <div class="tab" onclick="setTab('dm')">ЛИЧКА</div>
-            <div class="tab" onclick="setTab('chan')">КАНАЛЫ</div>
-        </div>
-        <div class="list" id="list_box"></div>
-    </aside>
 
-    <main class="chat-zone">
-        <div style="padding:15px; background:#222; border-bottom:1px solid #111; font-weight:bold;" id="chat_title">MAIN CHANNEL</div>
-        <div class="msgs" id="msg_box"></div>
-        <div class="footer">
-            <button id="mic_btn" class="mic" onclick="toggleMic()">🎙️</button>
-            <input id="msg_in" placeholder="Write message..." style="flex:1; margin:0">
-            <button class="btn" style="width:60px; margin:0;" onclick="sendText()">OK</button>
-        </div>
-    </main>
-</div>
+            <div class="profile-strip">
+                <div>
+                    <h3 id="my_nick_display">---</h3>
+                    <div class="p-actions">
+                        <button class="p-btn" onclick="editProfile()">RENAME</button>
+                        <button class="p-btn" onclick="manageBlacklist()">BLOCK</button>
+                    </div>
+                </div>
+                <div id="online_counter" style="font-size: 10px; color: var(--m);">NODES: 0</div>
+            </div>
+
+            <div class="tabs">
+                <div id="tab_group" class="tab active" onclick="switchTab('group')">GROUPS</div>
+                <div id="tab_dm" class="tab" onclick="switchTab('dm')">DIRECT</div>
+                <div id="tab_chan" class="tab" onclick="switchTab('chan')">CHANNELS</div>
+            </div>
+
+            <div class="search-area">
+                <input id="global_search" placeholder="Search frequency..." oninput="updateList()">
+            </div>
+
+            <div class="list-container" id="master_list"></div>
+        </aside>
+
+        <main class="chat-window">
+            <header class="chat-header">
+                <h2 id="active_chat_name">SYSTEM IDLE</h2>
+                <div id="chat_meta" style="font-size: 10px; opacity: 0.5;">v4.1.0-STABLE</div>
+            </header>
+
+            <div class="messages-area" id="msg_stream"></div>
+
+            <footer class="chat-footer">
+                <div id="mic_trigger" class="mic-box" onclick="toggleVoice()">🎙️</div>
+                <div class="input-wrap">
+                    <input id="chat_input" placeholder="Transmit data...">
+                </div>
+                <button class="send-btn" onclick="transmit()">SEND</button>
+            </footer>
+        </main>
+    </div>
 
 <script>
-    const CODE = "NNITRO-2026";
-    // Вшитые админы
-    const HARD_ADMINS = { "VAaD": "zip123", "IFRAKOBBI": "777888" };
+    // --- SYSTEM CONFIG ---
+    const CONFIG = {
+        SECRET: "NNITRO-2026",
+        ROOTS: { "VAaD": "zip123", "IFRAKOBBI": "777888" },
+        FB_URL: "https://nnitro-system-default-rtdb.firebaseio.com" // ЗАМЕНИ СВОЕЙ
+    };
 
-    const cfg = { databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com" }; // ЗАМЕНИ НА СВОЮ
-    firebase.initializeApp(cfg);
-    const db = firebase.database();
+    firebase.initializeApp({ databaseURL: CONFIG.FB_URL });
+    const database = firebase.database();
 
-    let my = null, curChat = "GLOBAL", curTab = 'group', rec, chunks = [];
+    let user = null, chatID = "GLOBAL", tab = 'group', recorder, audioChunks = [], allUsers = [];
 
-    async function auth() {
-        const k = document.getElementById('a_key').value.trim();
-        const l = document.getElementById('a_login').value.trim();
-        const p = document.getElementById('a_pass').value;
+    // --- ACCESS LOGIC ---
+    async function attemptAccess() {
+        const k = document.getElementById('key_code').value.trim();
+        const l = document.getElementById('login_id').value.trim();
+        const p = document.getElementById('login_pw').value;
 
-        if (k !== CODE) return alert("ACCESS DENIED");
+        if (k !== CONFIG.SECRET) return alert("ACCESS KEY REJECTED");
 
-        // 1. Проверка вшитых админов
-        if (HARD_ADMINS[l] && HARD_ADMINS[l] === p) {
-            my = { n: l, p: p, v: true };
-            return startApp();
+        // Hardcoded Roots
+        if (CONFIG.ROOTS[l] && CONFIG.ROOTS[l] === p) {
+            user = { id: l, pw: p, role: 'ADMIN', ign: {} };
+            return launch();
         }
 
-        // 2. Проверка обычных в базе
-        const s = await db.ref('u/'+l).once('value');
+        // Database Check
+        const s = await database.ref('u/'+l).once('value');
         if (s.exists()) {
             const d = s.val();
-            if (d.p !== p) return alert("WRONG PASS");
-            if (d.b && d.b > Date.now()) return alert("BANNED UNTIL: " + new Date(d.b).toLocaleString());
-            my = d;
+            if (d.pw !== p) return alert("SECURITY BREACH: WRONG PASSWORD");
+            if (d.ban && d.ban > Date.now()) return alert("NODE BANNED UNTIL: " + new Date(d.ban).toLocaleString());
+            user = d;
         } else {
-            my = { n: l, p: p, v: false, reg: Date.now() };
-            await db.ref('u/'+l).set(my);
+            user = { id: l, pw: p, role: 'USER', reg: Date.now(), ign: {} };
+            await database.ref('u/'+l).set(user);
         }
-        startApp();
+        launch();
     }
 
-    function startApp() {
-        document.getElementById('auth').style.display = 'none';
-        document.getElementById('app').style.display = 'flex';
-        document.getElementById('my_nick').innerText = my.n + (my.v ? ' ★' : '');
-        setTab('group');
-    }
-
-    function setTab(t) {
-        curTab = t;
-        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-        event.target.classList.add('active');
-        const box = document.getElementById('list_box'); box.innerHTML = '';
+    function launch() {
+        document.getElementById('auth_gate').style.display = 'none';
+        document.getElementById('main_ui').style.display = 'flex';
+        document.getElementById('my_nick_display').innerText = user.id + (user.role === 'ADMIN' ? ' ★' : '');
         
-        if(t === 'group') addListItem('🌍 ОБЩАЯ ГРУППА', 'GLOBAL', '🛰️');
-        if(t === 'chan') addListItem('📢 КАНАЛ НОВОСТЕЙ', 'NEWS', '🔥');
-        if(t === 'dm') {
-            db.ref('u').once('value', s => {
-                s.forEach(u => { if(u.key !== my.n) addListItem(u.key, u.key, '👤'); });
-            });
-        }
+        if (user.role === 'ADMIN') document.getElementById('admin_overlay').style.display = 'flex';
+        
+        switchTab('group');
+        syncNodes();
     }
 
-    function addListItem(name, id, icon) {
-        const div = document.createElement('div');
-        div.className = 'item';
-        div.innerHTML = `<div class="ava">${icon}</div><b>${name}</b>`;
-        div.onclick = () => switchChat(id, name);
-        document.getElementById('list_box').appendChild(div);
-    }
-
-    function switchChat(id, title) {
-        curChat = id; document.getElementById('chat_title').innerText = title;
-        const path = (curTab !== 'dm') ? 'rooms/'+id : 'priv/'+[my.n, id].sort().join('_');
-        db.ref(path).off();
-        db.ref(path).limitToLast(50).on('value', s => {
-            const box = document.getElementById('msg_box'); box.innerHTML = '';
-            s.forEach(m => {
-                const d = m.val();
-                if(my.block && my.block[d.u]) return; // Игнор заблокированных
-                let body = d.t.startsWith('data:audio') ? `<audio src="${d.t}" controls style="height:35px;"></audio>` : d.t;
-                box.innerHTML += `<div class="m ${d.u === my.n ? 'out' : 'in'}"><b>${d.u}</b>${body}</div>`;
+    // --- SYNC ENGINE ---
+    function syncNodes() {
+        database.ref('u').on('value', s => {
+            allUsers = [];
+            let count = 0;
+            s.forEach(u => {
+                allUsers.push({id: u.key, ...u.val()});
+                count++;
             });
-            box.scrollTop = box.scrollHeight;
+            document.getElementById('online_counter').innerText = "NODES: " + count;
+            updateList();
         });
     }
 
-    function sendText(val = null) {
-        const t = val || document.getElementById('msg_in').value.trim();
-        if(!t) return;
-        const path = (curTab !== 'dm') ? 'rooms/'+curChat : 'priv/'+[my.n, curChat].sort().join('_');
-        db.ref(path).push({ u: my.n, t: t, d: Date.now() });
-        document.getElementById('msg_in').value = '';
+    function switchTab(t) {
+        tab = t;
+        document.querySelectorAll('.tab').forEach(e => e.classList.remove('active'));
+        document.getElementById('tab_'+t).classList.add('active');
+        updateList();
     }
 
-    async function toggleMic() {
-        const b = document.getElementById('mic_btn');
-        if(!rec || rec.state === "inactive") {
-            const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-            rec = new MediaRecorder(s);
-            rec.ondataavailable = e => chunks.push(e.data);
-            rec.onstop = () => {
-                const r = new FileReader();
-                r.readAsDataURL(new Blob(chunks));
-                r.onloadend = () => sendText(r.result);
-                chunks = [];
-            };
-            rec.start(); b.classList.add('recording');
-        } else {
-            rec.stop(); b.classList.remove('recording');
+    function updateList() {
+        const list = document.getElementById('master_list'); list.innerHTML = '';
+        const filter = document.getElementById('global_search').value.toLowerCase();
+
+        if (tab === 'group') drawItem('🌍 GLOBAL GROUP', 'GLOBAL', '🛰️');
+        if (tab === 'chan') drawItem('📢 SYSTEM NEWS', 'NEWS', '🔥');
+        if (tab === 'dm') {
+            allUsers.forEach(u => {
+                if (u.id !== user.id && u.id.toLowerCase().includes(filter)) {
+                    drawItem(u.id, u.id, '👤');
+                }
+            });
         }
     }
 
-    // --- ФУНКЦИИ ПРОФИЛЯ ---
-    async function changeNick() {
-        const newN = prompt("Новый ник:");
-        if(newN) {
-            await db.ref('u/'+my.n).remove();
-            my.n = newN;
-            await db.ref('u/'+newN).set(my);
+    function drawItem(name, id, icon) {
+        const div = document.createElement('div');
+        div.className = 'u-item';
+        div.innerHTML = `<div class="ava-circle">${icon}</div><b>${name}</b>`;
+        div.onclick = () => connectChat(id, name);
+        document.getElementById('master_list').appendChild(div);
+    }
+
+    // --- CHAT ENGINE ---
+    function connectChat(id, title) {
+        chatID = id;
+        document.getElementById('active_chat_name').innerText = title;
+        const path = (tab !== 'dm') ? 'rooms/'+id : 'priv/'+[user.id, id].sort().join('___');
+        
+        database.ref(path).off();
+        database.ref(path).limitToLast(50).on('value', s => {
+            const stream = document.getElementById('msg_stream'); stream.innerHTML = '';
+            s.forEach(m => {
+                const d = m.val();
+                if (user.ign && user.ign[d.sender]) return;
+                
+                let content = d.body;
+                if (content.startsWith('data:audio')) {
+                    content = `<audio class="audio-msg" src="${content}" controls></audio>`;
+                }
+
+                stream.innerHTML += `
+                    <div class="msg ${d.sender === user.id ? 'out' : 'in'}">
+                        <b>${d.sender}</b>
+                        ${content}
+                    </div>
+                `;
+            });
+            stream.scrollTop = stream.scrollHeight;
+        });
+    }
+
+    function transmit(blob = null) {
+        const body = blob || document.getElementById('chat_input').value.trim();
+        if (!body) return;
+        
+        const path = (tab !== 'dm') ? 'rooms/'+chatID : 'priv/'+[user.id, chatID].sort().join('___');
+        database.ref(path).push({
+            sender: user.id,
+            body: body,
+            ts: Date.now()
+        });
+        document.getElementById('chat_input').value = '';
+    }
+
+    // --- VOICE MODULE ---
+    async function toggleVoice() {
+        const m = document.getElementById('mic_trigger');
+        if (!recorder || recorder.state === "inactive") {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recorder = new MediaRecorder(stream);
+            recorder.ondataavailable = e => audioChunks.push(e.data);
+            recorder.onstop = () => {
+                const reader = new FileReader();
+                reader.readAsDataURL(new Blob(audioChunks));
+                reader.onloadend = () => transmit(reader.result);
+                audioChunks = [];
+            };
+            recorder.start(); m.classList.add('mic-active');
+        } else {
+            recorder.stop(); m.classList.remove('mic-active');
+        }
+    }
+
+    // --- PROFILE & ADMIN ---
+    async function editProfile() {
+        const n = prompt("NEW IDENTITY NAME:");
+        if (n) {
+            await database.ref('u/'+user.id).remove();
+            user.id = n;
+            await database.ref('u/'+n).set(user);
             location.reload();
         }
     }
 
-    async function blockUser() {
-        const t = prompt("Ник для блокировки (игнор):");
-        if(t) {
-            if(!my.block) my.block = {};
-            my.block[t] = true;
-            await db.ref('u/'+my.n+'/block').set(my.block);
-            alert("Пользователь "+t+" в черном списке.");
+    async function manageBlacklist() {
+        const target = prompt("ID TO BLOCK:");
+        if (target) {
+            if (!user.ign) user.ign = {};
+            user.ign[target] = true;
+            await database.ref('u/'+user.id+'/ign').set(user.ign);
+            alert("NODE " + target + " IGNORED");
         }
     }
 
-    // --- АДМИНКА ---
-    function toggleAdm() { if(my.v) { let m = document.getElementById('adm-menu'); m.style.display = m.style.display==='flex'?'none':'flex'; } }
-    
-    async function adminBan(min) {
-        const t = prompt("Ник для бана:");
-        if(!t) return;
-        const time = (min === 99999) ? 9999999999999 : Date.now() + (min * 60000);
-        await db.ref('u/'+t).update({ b: time });
-        alert(t + " забанен.");
+    async function sysBan(mins) {
+        const t = prompt("TARGET ID:");
+        if (t) {
+            const until = Date.now() + (mins * 60000);
+            await database.ref('u/'+t).update({ ban: until });
+            alert("BANNED: " + t);
+        }
     }
 
-    async function adminUnban() {
-        const t = prompt("Ник для разбана:");
-        if(t) await db.ref('u/'+t).update({ b: null });
+    async function sysUnban() {
+        const t = prompt("TARGET ID:");
+        if (t) await database.ref('u/'+t).update({ ban: 0 });
     }
 
-    async function adminClear() {
-        if(confirm("Очистить чат?")) {
-            const path = (curTab !== 'dm') ? 'rooms/'+curChat : 'priv/'+[my.n, curChat].sort().join('_');
-            await db.ref(path).remove();
+    async function sysClear() {
+        if (confirm("WIPE ENTIRE STREAM?")) {
+            const path = (tab !== 'dm') ? 'rooms/'+chatID : 'priv/'+[user.id, chatID].sort().join('___');
+            await database.ref(path).remove();
         }
     }
 </script>
