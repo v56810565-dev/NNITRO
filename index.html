@@ -3,107 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NNITRO OS</title>
+    <title>NNITRO 2026 | VAaD ULTIMATE SYSTEM</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        :root { --bg: #ffffff; --panel: #f2f2f7; --text: #000; --accent: #007aff; --border: rgba(0,0,0,0.1); }
-        .dark-mode { --bg: #000; --panel: #1c1c1e; --text: #fff; --border: rgba(255,255,255,0.1); }
-        
-        * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
-        body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
-        
-        #app { display: grid; grid-template-columns: 320px 1fr; height: 100vh; }
-        
-        /* Sidebar */
-        #sidebar { background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .search-area { padding: 15px; border-bottom: 1px solid var(--border); }
-        .search-area input { width: 100%; padding: 10px; border-radius: 10px; border: none; background: var(--panel); color: var(--text); }
-        
-        .list-items { flex: 1; overflow-y: auto; }
-        .item { padding: 12px 15px; display: flex; align-items: center; gap: 10px; cursor: pointer; border-bottom: 1px solid var(--border); }
-        .item:hover { background: var(--panel); }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .online-dot { width: 10px; height: 10px; background: #34c759; border-radius: 50%; border: 2px solid var(--bg); position: absolute; bottom: 0; right: 0; }
+        :root { --apple-bg: #ffffff; --apple-gray: #f2f2f7; --apple-blue: #007aff; --apple-border: rgba(0,0,0,0.1); }
+        * { box-sizing: border-box; font-family: -apple-system, sans-serif; transition: all 0.3s ease; }
+        body, html { margin: 0; padding: 0; background: var(--apple-bg); height: 100vh; overflow: hidden; }
 
-        /* Chat */
-        #chat { display: flex; flex-direction: column; background: var(--bg); }
-        .chat-header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
-        .m { max-width: 70%; padding: 10px 15px; border-radius: 18px; font-size: 15px; }
-        .m.in { align-self: flex-start; background: var(--panel); }
-        .m.out { align-self: flex-end; background: var(--accent); color: #fff; }
+        /* ИНТЕРФЕЙС: ПК vs ТЕЛЕФОН */
+        #app { display: grid; height: 100vh; width: 100vw; }
+        @media (min-width: 900px) { #app { grid-template-columns: 380px 1fr; } .back-btn { display: none; } }
+        @media (max-width: 899px) { #app { grid-template-columns: 1fr; } .sidebar.hidden-mobile { display: none; } .chat-window.hidden-mobile { display: none; } }
 
-        /* Modals */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: var(--bg); padding: 25px; border-radius: 20px; width: 300px; text-align: center; }
-        .btn { width: 100%; padding: 12px; margin-top: 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; }
-        .btn-blue { background: var(--accent); color: #white; }
+        /* SIDEBAR (МЕНЮ) */
+        .sidebar { background: #fff; border-right: 1px solid var(--apple-border); display: flex; flex-direction: column; z-index: 10; }
+        .header { height: 70px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--apple-border); font-weight: 700; font-size: 22px; }
+        .search-box { padding: 10px 15px; }
+        .search-box input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--apple-border); background: var(--apple-gray); }
+        .user-list { flex: 1; overflow-y: auto; }
+        .user-item { padding: 15px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; border-bottom: 1px solid #f9f9f9; }
+        .user-item:hover { background: var(--apple-gray); }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        /* CHAT WINDOW */
+        .chat-window { display: flex; flex-direction: column; position: relative; background: #fff; }
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .msg { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 15px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .msg.in { align-self: flex-start; background: var(--apple-gray); border-bottom-left-radius: 5px; }
+        .msg.out { align-self: flex-end; background: var(--apple-blue); color: #fff; border-bottom-right-radius: 5px; }
+        .input-area { padding: 20px; border-top: 1px solid var(--apple-border); display: flex; gap: 10px; align-items: center; }
+        .input-area input { flex: 1; padding: 12px; border-radius: 20px; border: none; background: var(--apple-gray); outline: none; }
+
+        /* ФИНАЛЫ: МУТАЦИЯ И ЛЕКАРСТВО */
+        #mutation-screen { position: fixed; inset: 0; z-index: 99999; display: none; background: #000; color: #fff; text-align: center; padding-top: 20vh; font-family: monospace; }
+        #horror-overlay { 
+            position: fixed; inset: 0; z-index: 99998; display: none; pointer-events: none;
+            background: url('https://www.transparenttextures.com/patterns/circuit-board.png') #001a00;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 15% 15%, 85% 15%, 85% 85%, 15% 85%, 15% 15%);
+        }
+        #cure-screen { position: fixed; inset: 0; background: #fff; z-index: 100000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; }
         
-        #vaad-admin { position: fixed; right: 20px; top: 70px; width: 350px; background: var(--bg); border: 1px solid var(--accent); border-radius: 15px; padding: 20px; display: none; z-index: 2000; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        /* АНИМАЦИИ */
+        .virus-win { filter: invert(1) hue-rotate(180deg); animation: shake 0.1s infinite; }
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } }
+
+        /* ЗВУКИ И ЗВОНКИ */
+        .call-ui { position: absolute; top: 80px; right: 20px; background: #fff; padding: 15px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: none; z-index: 100; }
+        .btn-call { font-size: 25px; border: none; background: none; cursor: pointer; }
 
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="auth-screen" style="position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center;">
-        <div style="width:300px; text-align:center;">
-            <h1 style="font-size:40px; margin-bottom:20px;">NNITRO</h1>
-            <input type="text" id="u-nick" placeholder="Username" style="width:100%; padding:15px; border-radius:12px; border:1px solid var(--border);">
-            <input type="password" id="u-pass" placeholder="Password (for VAaD)" style="width:100%; padding:15px; border-radius:12px; border:1px solid var(--border); margin-top:10px;">
-            <button onclick="login()" class="btn" style="background:var(--accent); color:white;">ENTER</button>
+<div id="horror-overlay"></div>
+<div id="mutation-screen">
+    <h1 style="font-size: 100px;">:(</h1>
+    <h2>СИСТЕМА ПЕРЕЗАГРУЖАЕТСЯ...</h2>
+    <h1 id="virus-timer">23:59:59</h1>
+</div>
+<div id="cure-screen">
+    <h2 style="color: #007aff;">ИЗВИНИТЕ ЧТО ЗАСТАВЛЯЕМ ЖДАТЬ,<br>НО МЫ УНИЧТОЖАЕМ ВИРУС ЛЕКАРСТВОМ</h2>
+    <h1 id="cure-timer" style="font-size: 60px;">05:00:00</h1>
+</div>
+
+<div id="auth-gate" style="position: fixed; inset: 0; background: #fff; z-index: 100001; display: flex; align-items: center; justify-content: center;">
+    <div style="width: 320px; text-align: center;">
+        <h1 style="font-size: 45px; letter-spacing: -3px; margin-bottom: 30px;">NNITRO</h1>
+        <div style="display: flex; margin-bottom: 20px; background: #eee; border-radius: 12px; padding: 2px;">
+            <button onclick="setAuthMode('login')" id="t-log" style="flex:1; padding:10px; border:none; border-radius:10px; background:#fff;">Войти</button>
+            <button onclick="setAuthMode('reg')" id="t-reg" style="flex:1; padding:10px; border:none; border-radius:10px; background:none;">Регистрация</button>
+        </div>
+        <input type="text" id="n-nick" placeholder="Никнейм">
+        <input type="email" id="n-mail" placeholder="E-mail (VIP: оставь пустым)">
+        <input type="password" id="n-pass" placeholder="Пароль или яшз123">
+        <button onclick="handleAuth()" style="width: 100%; padding: 15px; background: #007aff; color: #fff; border: none; border-radius: 15px; font-weight: bold; margin-top: 15px; cursor: pointer;">ВОЙТИ В СИСТЕМУ</button>
+    </div>
+</div>
+
+<div id="app" class="hidden">
+    <div class="sidebar" id="side-p">
+        <div class="header">
+            NNITRO 2026 
+            <span id="ghost-status" style="font-size: 10px; color: #aaa;"></span>
+        </div>
+        <div class="search-box">
+            <input type="text" id="user-search" placeholder="Поиск профилей..." oninput="searchUsers()">
+        </div>
+        <div class="user-list" id="u-list">
+            </div>
+        <div id="vaad-info" class="hidden" style="padding: 15px; background: #000; color: #0f0; font-family: monospace; font-size: 11px;">
+            <div>РЕГИСТРАЦИЙ: <span id="stat-regs">0</span></div>
+            <div>ОНЛАЙН: <span id="stat-on">0</span></div>
+            <div>ЧАТОВ: <span id="stat-chats">0</span></div>
+            <button onclick="triggerCure()" style="background: green; color: #fff; border: none; margin-top: 5px; width: 100%;">ЗАПУСТИТЬ ЛЕЧЕНИЕ</button>
+            <button onclick="roulette()" style="background: red; color: #fff; border: none; margin-top: 5px; width: 100%;">РУЛЕТКА (INFECT)</button>
         </div>
     </div>
 
-    <div id="app" class="hidden">
-        <div id="sidebar">
-            <div class="search-area">
-                <input type="text" id="search-inp" placeholder="Поиск людей..." onkeyup="searchUsers(this.value)">
-            </div>
-            <div id="contacts-list" class="list-items">
-                <div class="item" onclick="openChat('global', 'Глобальный чат')">
-                    <div class="avatar" style="background:#000;">G</div>
-                    <b>Глобальный чат</b>
-                </div>
-            </div>
-            <div style="padding:15px;"><button class="btn" onclick="showGroupModal()">+ Создать группу</button></div>
+    <div class="chat-window hidden-mobile" id="chat-p">
+        <div class="header">
+            <button class="back-btn" onclick="showSidebar()">⬅️</button>
+            <span id="active-chat-name">Глобальный чат</span>
+            <button onclick="startCall()" style="background: none; border: none; font-size: 20px;">📞</button>
         </div>
-
-        <div id="chat">
-            <div class="chat-header">
-                <span id="chat-title">Выберите чат</span>
-                <button id="adm-btn" class="hidden" onclick="toggleVAaD()" style="background:none; border:none; font-size:20px; cursor:pointer;">⚙️</button>
-            </div>
-            <div id="messages"></div>
-            <div style="padding:15px; display:flex; gap:10px; border-top:1px solid var(--border);">
-                <button onclick="startVoice()" onmouseup="stopVoice()" id="mic" style="border:none; background:var(--panel); border-radius:50%; width:45px; height:45px; cursor:pointer;">🎤</button>
-                <input type="text" id="m-inp" placeholder="Сообщение..." style="flex:1; padding:12px; border-radius:12px; border:none; background:var(--panel); color:var(--text);">
-                <button onclick="send()" style="border:none; background:none; color:var(--accent); font-weight:bold; cursor:pointer;">SEND</button>
-            </div>
+        <div id="messages"></div>
+        <div class="call-ui" id="call-box">
+            <div style="margin-bottom: 10px;">Входящий вызов...</div>
+            <button class="btn-call" onclick="endCall()" style="color: green;">$\diamondsuit$</button> <button class="btn-call" onclick="endCall()" style="color: red;">$\ast$</button> </div>
+        <div class="input-area">
+            <button onclick="sendEmoji('👍')" style="background: none; border: none; font-size: 20px;">👍</button>
+            <input type="text" id="m-input" placeholder="Сообщение...">
+            <button onclick="sendMessage()" style="color: #007aff; background: none; border: none; font-weight: bold;">SEND</button>
         </div>
     </div>
-
-    <div id="user-modal" class="modal" onclick="closeModals()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="avatar" id="m-avatar" style="width:80px; height:80px; margin:0 auto 15px; font-size:30px;">?</div>
-            <h2 id="m-username">User</h2>
-            <button class="btn btn-blue" onclick="startPrivate()">Написать ЛС</button>
-            <button class="btn" style="background:#ff3b30; color:white;" onclick="blockUser()">Заблокировать</button>
-        </div>
-    </div>
-
-    <div id="vaad-admin">
-        <h3>VAaD CONTROL PANEL</h3>
-        <p>Вирус: <span id="v-val">0</span>%</p>
-        <button class="btn" onclick="runRoulette()" style="background:red; color:white;">ЗАПУСТИТЬ РУЛЕТКУ</button>
-        <hr>
-        <h4>Юзеры в базе:</h4>
-        <div id="admin-user-list" style="font-size:12px; text-align:left;"></div>
-        <button class="btn" onclick="toggleVAaD()">Закрыть</button>
-    </div>
+</div>
 
 <script>
+    // --- КОНФИГУРАЦИЯ FIREBASE (Твоя база) ---
     const firebaseConfig = {
         apiKey: "AIzaSyAThHqr7jix2KbL7q9kc3JJ4_dMpn09q-o",
         authDomain: "nnitro-system.firebaseapp.com",
@@ -111,134 +129,174 @@
         projectId: "nnitro-system"
     };
     firebase.initializeApp(firebaseConfig);
-    const rdb = firebase.database();
+    const db = firebase.database();
 
-    let myNick = "";
-    let currentChatId = "";
-    let selectedUser = "";
-    let mediaRecorder, chunks = [];
+    let myNick = "", myRole = "user", isInfected = false, currentTarget = "global", authMode = "login";
 
-    function login() {
-        myNick = document.getElementById('u-nick').value.trim();
-        let p = document.getElementById('u-pass').value;
-        if(!myNick) return;
+    // --- ЛОГИКА ВХОДА ---
+    function setAuthMode(m) {
+        authMode = m;
+        document.getElementById('t-log').style.background = m === 'login' ? '#fff' : 'none';
+        document.getElementById('t-reg').style.background = m === 'reg' ? '#fff' : 'none';
+    }
 
-        if(myNick === "VAaD" && p === "zip123") document.getElementById('adm-btn').classList.remove('hidden');
+    function handleAuth() {
+        const nick = document.getElementById('n-nick').value.trim();
+        const pass = document.getElementById('n-pass').value;
+        const mail = document.getElementById('n-mail').value;
 
-        rdb.ref('users/' + myNick).set({ lastSeen: Date.now(), online: true });
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('app').classList.remove('hidden');
+        if (!nick || !pass) return alert("Заполни поля!");
+
+        const isVIP = (pass === "яшз123");
         
-        loadSidebar();
-        listenVirus();
-    }
-
-    function loadSidebar() {
-        rdb.ref('users').on('value', snap => {
-            const list = document.getElementById('contacts-list');
-            list.innerHTML = `<div class="item" onclick="openChat('global', 'Глобальный чат')"><div class="avatar" style="background:#000;">G</div><b>Глобальный чат</b></div>`;
-            snap.forEach(u => {
-                if(u.key !== myNick) {
-                    list.innerHTML += `
-                        <div class="item" onclick="showProfile('${u.key}')">
-                            <div class="avatar">${u.key[0]}</div>
-                            <div>
-                                <b>${u.key}</b><br>
-                                <small>${u.val().online ? '● online' : 'offline'}</small>
-                            </div>
-                        </div>`;
-                }
+        if (authMode === 'reg') {
+            if (!isVIP && !mail.includes('@')) return alert("Нужен E-mail или спец-код!");
+            db.ref('users/' + nick).set({
+                online: true,
+                infected: false,
+                role: isVIP ? 'admin' : 'user',
+                mail: isVIP ? 'VIP-HIDDEN' : mail,
+                status: 'online'
             });
-        });
-    }
-
-    function showProfile(nick) {
-        selectedUser = nick;
-        document.getElementById('m-username').innerText = nick;
-        document.getElementById('m-avatar').innerText = nick[0];
-        document.getElementById('user-modal').style.display = 'flex';
-    }
-
-    function startPrivate() {
-        const id = myNick < selectedUser ? `${myNick}_${selectedUser}` : `${selectedUser}_${myNick}`;
-        openChat(id, `ЛС: ${selectedUser}`);
-        closeModals();
-    }
-
-    function openChat(id, title) {
-        currentChatId = id;
-        document.getElementById('chat-title').innerText = title;
-        listenMessages();
-    }
-
-    function send() {
-        const val = document.getElementById('m-inp').value;
-        if(!val || !currentChatId) return;
-        rdb.ref('msgs/' + currentChatId).push({ user: myNick, text: val, time: Date.now() });
-        document.getElementById('m-inp').value = "";
-    }
-
-    function listenMessages() {
-        rdb.ref('msgs/' + currentChatId).limitToLast(50).on('value', snap => {
-            const box = document.getElementById('messages');
-            box.innerHTML = "";
-            snap.forEach(c => {
-                const d = c.val();
-                box.innerHTML += `<div class="m ${d.user === myNick ? 'out' : 'in'}"><b>${d.user}</b><br>${d.text}</div>`;
-            });
-            box.scrollTop = box.scrollHeight;
-        });
-    }
-
-    function toggleVAaD() {
-        const p = document.getElementById('vaad-admin');
-        const show = p.style.display !== 'block';
-        p.style.display = show ? 'block' : 'none';
-        if(show) {
-            rdb.ref('users').once('value', snap => {
-                let html = "";
-                snap.forEach(u => { html += `<div>${u.val().online ? '🟢' : '⚪'} ${u.key}</div>`; });
-                document.getElementById('admin-user-list').innerHTML = html;
+            db.ref('system/stats/totalRegs').transaction(c => (c || 0) + 1);
+            enterApp(nick, isVIP ? 'admin' : 'user');
+        } else {
+            db.ref('users/' + nick).once('value', s => {
+                if (s.exists()) enterApp(nick, s.val().role);
+                else alert("Нет такого юзера!");
             });
         }
     }
 
-    function listenVirus() {
-        rdb.ref('system/virus').on('value', s => {
-            const v = s.val() || 0;
-            document.getElementById('v-val').innerText = Math.floor(v);
-            if(v >= 51) document.body.style.filter = "invert(1) hue-rotate(180deg)";
-        });
+    function enterApp(n, r) {
+        myNick = n; myRole = r;
+        document.getElementById('auth-gate').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        if (r === 'admin') document.getElementById('vaad-info').classList.remove('hidden');
+        db.ref('users/' + n).update({ online: true, status: 'online' });
+        initSystem();
     }
 
-    function runRoulette() {
-        rdb.ref('users').once('value', s => {
-            const users = Object.keys(s.val());
-            const v = users[Math.floor(Math.random()*users.length)];
-            rdb.ref('system/infected_user').set(v);
-            alert("Нулевой пациент: " + v);
-        });
+    // --- СИСТЕМА ЧАТА И ЗАРАЖЕНИЯ ---
+    function sendMessage() {
+        const text = document.getElementById('m-input').value;
+        if (!text) return;
+        postMessage(text, false);
+        document.getElementById('m-input').value = "";
     }
 
-    async function startVoice() {
-        const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-        mediaRecorder = new MediaRecorder(stream);
-        chunks = [];
-        mediaRecorder.ondataavailable = e => chunks.push(e.data);
-        mediaRecorder.start();
-    }
-    function stopVoice() {
-        mediaRecorder.stop();
-        mediaRecorder.onstop = () => {
-            const reader = new FileReader();
-            reader.readAsDataURL(new Blob(chunks));
-            reader.onloadend = () => {
-                rdb.ref('msgs/'+currentChatId).push({ user:myNick, text:`<audio controls src="${reader.result}"></audio>`, time:Date.now() });
-            };
+    function sendEmoji(e) { postMessage(e, true); }
+
+    function postMessage(t, isLike) {
+        const msgData = {
+            sender: myNick,
+            text: t,
+            isLike: isLike,
+            infected: isInfected,
+            timestamp: Date.now()
         };
+        db.ref('messages/' + currentTarget).push(msgData);
+        db.ref('system/stats/totalChats').transaction(c => (c || 0) + 1);
+        
+        // Рост вируса если отправитель заражен
+        if (isInfected) db.ref('system/virusLevel').transaction(v => (v || 0) + 1);
     }
 
-    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+    function initSystem() {
+        // Слушаем сообщения
+        db.ref('messages/' + currentTarget).limitToLast(50).on('value', s => {
+            const box = document.getElementById('messages');
+            box.innerHTML = "";
+            s.forEach(snap => {
+                const m = snap.val();
+                // ЛОГИКА ТИХОГО ЗАРАЖЕНИЯ
+                if (m.infected && m.sender !== myNick && myRole !== 'admin' && !isInfected) {
+                    let chance = m.isLike ? 0.3 : 1.0; // 30% если лайк, 100% если текст
+                    if (Math.random() < chance) {
+                        isInfected = true;
+                        db.ref('users/' + myNick).update({ infected: true });
+                    }
+                }
+                const cls = m.sender === myNick ? 'out' : 'in';
+                box.innerHTML += `<div class="msg ${cls}"><b>${m.sender}</b><br>${m.text}</div>`;
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+
+        // Статистика (без накруток)
+        db.ref('system/stats').on('value', s => {
+            const d = s.val();
+            document.getElementById('stat-regs').innerText = d.totalRegs || 0;
+            document.getElementById('stat-chats').innerText = d.totalChats || 0;
+        });
+        db.ref('users').on('value', s => {
+            const u = s.val();
+            document.getElementById('stat-on').innerText = Object.values(u).filter(x => x.online).length;
+            renderUserList(u);
+            if (u[myNick] && u[myNick].infected) isInfected = true;
+        });
+
+        // ГОНКА: ВИРУС vs ЛЕКАРСТВО
+        db.ref('system').on('value', snap => {
+            const s = snap.val();
+            if (s.virusLevel >= 51 && s.cureLevel < 51) {
+                document.body.classList.add('virus-win');
+                document.getElementById('mutation-screen').style.display = 'block';
+                setTimeout(() => { document.getElementById('horror-overlay').style.display = 'block'; }, 5000);
+            }
+            if (s.cureLevel >= 51) {
+                if (isInfected) {
+                    document.getElementById('cure-screen').style.display = 'flex';
+                    db.ref('users/' + myNick).update({ status: 'лечится' });
+                }
+            }
+        });
+    }
+
+    // --- МОБИЛЬНОЕ МЕНЮ ---
+    function openChat(name) {
+        currentTarget = name;
+        document.getElementById('active-chat-name').innerText = name;
+        if (window.innerWidth < 900) {
+            document.getElementById('side-p').classList.add('hidden-mobile');
+            document.getElementById('chat-p').classList.remove('hidden-mobile');
+        }
+        initSystem();
+    }
+
+    function showSidebar() {
+        document.getElementById('side-p').classList.remove('hidden-mobile');
+        document.getElementById('chat-p').classList.add('hidden-mobile');
+    }
+
+    function renderUserList(users) {
+        const list = document.getElementById('u-list');
+        list.innerHTML = `<div class="user-item" onclick="openChat('global')"><b>📢 ГЛОБАЛЬНЫЙ ЧАТ</b></div>`;
+        Object.keys(users).forEach(u => {
+            if (u === myNick) return;
+            const color = users[u].status === 'лечится' ? 'orange' : (users[u].online ? 'green' : 'gray');
+            list.innerHTML += `<div class="user-item" onclick="openChat('${u}')">
+                <div class="status-dot" style="background:${color}"></div>
+                <span>${u}</span>
+                <span style="font-size:9px; opacity:0.5;">${users[u].status}</span>
+            </div>`;
+        });
+    }
+
+    // --- АДМИН ФУНКЦИИ ---
+    function triggerCure() { db.ref('system/cureLevel').set(100); }
+    function roulette() {
+        db.ref('users').once('value', s => {
+            const keys = Object.keys(s.val());
+            const rand = keys[Math.floor(Math.random() * keys.length)];
+            db.ref('users/' + rand).update({ infected: true });
+            alert("Инфекция запущена в: " + rand);
+        });
+    }
+
+    function startCall() { document.getElementById('call-box').style.display = 'block'; }
+    function endCall() { document.getElementById('call-box').style.display = 'none'; }
+
 </script>
 </body>
 </html>
