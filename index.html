@@ -1,181 +1,213 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQUID GAME: USA EDITION</title>
+    <title>SQUID GAME USA | SYSTEM</title>
     <style>
         :root {
+            --yellow: #ffcc00;
+            --dark: #000000;
             --pink: #ff005a;
-            --green: #03a062;
-            --dark: #0a0a0a;
-            --gray: #1a1a1a;
         }
 
         body {
             background-color: var(--dark);
-            color: white;
+            color: var(--yellow);
             font-family: 'Courier New', Courier, monospace;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            align-items: center;
+            height: 100vh;
             margin: 0;
-            overflow-x: hidden;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .active { display: block; }
+
+        /* ЭТАП 1: ГЕОМЕТРИЧЕСКИЙ БЛОК */
+        .main-box {
+            border: 4px solid var(--yellow);
+            padding: 60px 80px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.2);
+        }
+
+        .main-box:hover {
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.5);
+            background: rgba(255, 204, 0, 0.05);
+        }
+
+        .symbols {
+            font-size: 80px;
+            letter-spacing: 25px;
+            user-select: none;
+        }
+
+        /* ЭТАП 2: МЕНЮ ИМЕНИ */
+        .input-group {
+            border: 2px solid var(--yellow);
+            padding: 40px;
+            background: #050505;
+        }
+
+        input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--yellow);
+            color: var(--yellow);
+            font-size: 1.5rem;
+            padding: 10px;
+            text-align: center;
+            outline: none;
+            width: 300px;
+            margin-bottom: 30px;
             text-transform: uppercase;
         }
 
-        /* Визитная карточка */
-        .card {
-            background: #c4a484; /* Цвет картона */
-            width: 350px;
-            height: 200px;
-            border-radius: 10px;
+        .btn {
+            background: var(--yellow);
+            color: black;
+            border: none;
+            padding: 10px 40px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        /* ЭТАП 3: ОТПЕЧАТОК ПАЛЬЦА */
+        .fingerprint-scanner {
+            width: 150px;
+            height: 150px;
+            border: 3px solid var(--yellow);
+            border-radius: 50%;
+            margin: 0 auto;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            margin-bottom: 30px;
-            position: relative;
-            color: #222;
-        }
-
-        .shapes {
-            font-size: 50px;
-            letter-spacing: 15px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        /* Таймер */
-        .timer-container {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        #timer {
-            font-size: 3rem;
-            color: var(--pink);
-            text-shadow: 0 0 10px var(--pink);
-        }
-
-        /* Форма регистрации */
-        .registration-box {
-            background: var(--gray);
-            padding: 30px;
-            border: 2px solid var(--pink);
-            border-radius: 5px;
-            width: 300px;
-            text-align: center;
-        }
-
-        h2 { color: var(--green); margin-bottom: 20px; }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            background: #000;
-            border: 1px solid var(--green);
-            color: var(--green);
-            box-sizing: border-box;
-        }
-
-        /* Кнопка отпечатка */
-        .fingerprint-btn {
-            background: none;
-            border: 2px solid var(--pink);
-            color: var(--pink);
-            padding: 20px;
-            margin-top: 20px;
+            font-size: 70px;
             cursor: pointer;
-            transition: 0.3s;
+            user-select: none;
             position: relative;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            font-size: 40px;
         }
 
-        .fingerprint-btn:hover {
-            background: var(--pink);
+        .fingerprint-scanner.scanning {
+            box-shadow: 0 0 50px var(--pink);
+            border-color: var(--pink);
+            color: var(--pink);
+        }
+
+        /* ЭТАП 4: ТАЙМЕР */
+        #timer {
+            font-size: 4.5rem;
+            font-weight: bold;
             color: white;
-            box-shadow: 0 0 20px var(--pink);
+            text-shadow: 0 0 20px var(--yellow);
         }
 
-        .fingerprint-btn:active {
-            transform: scale(0.9);
-        }
-
-        .location {
+        .prize-pool {
+            font-size: 1.5rem;
             margin-top: 20px;
-            font-size: 0.8rem;
-            color: #555;
+            color: var(--pink);
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .instruction { font-size: 0.8rem; margin-top: 20px; opacity: 0.6; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div class="shapes">○ △ □</div>
-        <div style="font-weight: bold; font-size: 1.2rem;">YOU ARE INVITED</div>
+    <div id="step1" class="container active">
+        <div class="main-box" onclick="showStep(2)">
+            <div class="symbols">○ △ □</div>
+        </div>
+        <p class="instruction">PRESS TO INITIALIZE</p>
     </div>
 
-    <div class="timer-container">
-        <p>TIME UNTIL THE GAMES BEGIN (USA):</p>
-        <div id="timer">00:00:00:00</div>
+    <div id="step2" class="container">
+        <div class="input-group">
+            <h2>IDENTIFICATION</h2>
+            <input type="text" id="pName" placeholder="PLAYER NAME" autocomplete="off">
+            <br>
+            <button class="btn" onclick="showStep(3)">CONFIRM</button>
+        </div>
     </div>
 
-    <div class="registration-box">
-        <h2>PLAYER JOIN</h2>
-        <input type="text" placeholder="FULL NAME" id="name">
-        <input type="number" placeholder="DEBT AMOUNT ($)" id="debt">
-        
-        <p style="font-size: 0.7rem; margin-top: 15px;">HOLD FINGERPRINT TO CONFIRM</p>
-        <button class="fingerprint-btn" onclick="register()">
+    <div id="step3" class="container">
+        <h2>BIOMETRIC SCAN</h2>
+        <div class="fingerprint-scanner" id="scanner" onmousedown="holdStart()" onmouseup="holdEnd()" ontouchstart="holdStart()" ontouchend="holdEnd()">
             ☝️
-        </button>
+        </div>
+        <p class="instruction" id="scanText">HOLD TO VERIFY IDENTITY</p>
     </div>
 
-    <div class="location">
-        LOCATION: SECRET FACILITY, NEVADA, USA
+    <div id="step4" class="container">
+        <h1 id="greet">PLAYER CONNECTED</h1>
+        <p>REMAINING TIME TO THE GAMES (NEVADA, USA):</p>
+        <div id="timer">00:00:00:00</div>
+        <div class="prize-pool">PRIZE: $456,000,000,000</div>
     </div>
 
     <script>
-        // Таймер до 31 мая
-        const targetDate = new Date("May 31, 2026 00:00:00").getTime();
+        let holdTimer;
 
-        const countdown = setInterval(function() {
-            const now = new Date().getTime();
-            const distance = targetDate - now;
-
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            document.getElementById("timer").innerHTML = 
-                `${days}d ${hours}h ${minutes}m ${seconds}s`;
-
-            if (distance < 0) {
-                clearInterval(countdown);
-                document.getElementById("timer").innerHTML = "LET THE GAMES BEGIN";
-            }
-        }, 1000);
-
-        // Функция "Регистрации"
-        function register() {
-            const name = document.getElementById('name').value;
-            if(name) {
-                alert("Welcome, Player. Your identity has been verified. Wait for the black van in Nevada.");
-            } else {
-                alert("Identify yourself, Player.");
+        function showStep(n) {
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            document.getElementById('step' + n).classList.add('active');
+            
+            if (n === 4) {
+                const name = document.getElementById('pName').value || '456';
+                document.getElementById('greet').innerText = `WELCOME, PLAYER ${name}`;
+                startCountdown();
             }
         }
-    </script>
 
+        function holdStart() {
+            const scanner = document.getElementById('scanner');
+            const text = document.getElementById('scanText');
+            scanner.classList.add('scanning');
+            text.innerText = "SCANNING...";
+            
+            holdTimer = setTimeout(() => {
+                showStep(4);
+            }, 2000); // Нужно держать 2 секунды
+        }
+
+        function holdEnd() {
+            const scanner = document.getElementById('scanner');
+            const text = document.getElementById('scanText');
+            clearTimeout(holdTimer);
+            scanner.classList.remove('scanning');
+            text.innerText = "SCAN FAILED. TRY AGAIN.";
+        }
+
+        function startCountdown() {
+            const target = new Date("May 31, 2026 00:00:00").getTime();
+
+            setInterval(() => {
+                const now = new Date().getTime();
+                const diff = target - now;
+
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById("timer").innerText = 
+                    `${d}d ${h}h ${m}m ${s}s`;
+            }, 1000);
+        }
+    </script>
 </body>
 </html>
