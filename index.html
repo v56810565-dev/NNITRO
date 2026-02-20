@@ -2,107 +2,202 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Детская Игра — Веселый Дизайн</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQUID GAME: USA EDITION</title>
     <style>
-        /* Общий фон — мягкий и радостный */
+        :root {
+            --squid-yellow: #ffdf00;
+            --squid-black: #0a0a0a;
+            --squid-pink: #ed1b76;
+        }
+
         body {
-            background-color: #FFEB3B; /* Солнечный желтый */
-            background: radial-gradient(circle, #FFF9C4 0%, #FFEB3B 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--squid-black);
+            color: var(--squid-yellow);
+            font-family: 'Courier New', Courier, monospace;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
 
-        /* Главный контейнер (игровая карточка) */
-        .game-window {
-            background: #FFFFFF;
-            border: 8px solid #4CAF50; /* Сочная зеленая рамка */
-            border-radius: 40px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 15px 0 #388E3C, 0 25px 50px rgba(0,0,0,0.1);
-            max-width: 400px;
-            width: 90%;
+        #game-container {
+            width: 350px;
+            height: 550px;
+            border: 5px solid var(--squid-yellow);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(255, 223, 0, 0.3);
+            transition: all 0.5s ease;
         }
 
-        /* Веселый заголовок */
-        h1 {
-            color: #FF5722; /* Оранжевый */
-            font-size: 42px;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 0px #FFCCBC;
-            letter-spacing: 2px;
+        /* Экраны */
+        .screen { display: none; width: 100%; text-align: center; }
+        .active { display: flex; flex-direction: column; align-items: center; }
+
+        /* Фигуры на главном */
+        .shapes { font-size: 50px; margin-bottom: 30px; cursor: pointer; letter-spacing: 15px; }
+        .shapes:hover { text-shadow: 0 0 15px var(--squid-yellow); }
+
+        /* Поля ввода */
+        input {
+            background: transparent;
+            border: 1px solid var(--squid-yellow);
+            color: var(--squid-yellow);
+            padding: 10px;
+            margin: 10px 0;
+            width: 80%;
+            outline: none;
         }
 
-        /* Описание */
-        p {
-            color: #555;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 30px;
-        }
-
-        /* Большая мультяшная кнопка */
-        .btn-start {
-            background: #2196F3; /* Яркий синий */
-            color: white;
+        button {
+            background: var(--squid-yellow);
+            color: black;
             border: none;
-            border-radius: 25px;
-            padding: 20px 50px;
-            font-size: 28px;
+            padding: 10px 20px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 8px 0 #1976D2; /* Объемная тень кнопки */
-            transition: all 0.1s;
-            text-transform: uppercase;
+            margin-top: 10px;
         }
 
-        /* Эффект нажатия */
-        .btn-start:hover {
-            background: #44a6f7;
-            transform: scale(1.05);
+        /* Сканер отпечатка */
+        .fingerprint-btn {
+            width: 80px;
+            height: 80px;
+            border: 2px solid var(--squid-yellow);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            margin-top: 20px;
+        }
+        .fingerprint-btn::after {
+            content: "ID";
+            font-size: 12px;
+        }
+        .scanning {
+            animation: pulse 1s infinite alternate;
         }
 
-        .btn-start:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 #1976D2;
+        @keyframes pulse {
+            from { box-shadow: 0 0 5px var(--squid-yellow); }
+            to { box-shadow: 0 0 25px var(--squid-pink); border-color: var(--squid-pink); }
         }
 
-        /* Декор по бокам */
-        .decor {
-            font-size: 40px;
-            display: inline-block;
-            margin: 10px;
-            animation: bounce 2s infinite ease-in-out;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
+        /* Таймер */
+        #timer { font-size: 30px; font-weight: bold; color: var(--squid-pink); }
+        .address-hint { font-size: 10px; margin-top: 20px; color: #555; }
     </style>
 </head>
 <body>
 
-    <div class="game-window">
-        <div class="decor">⭐</div>
-        <div class="decor">🎈</div>
-        <div class="decor">🌈</div>
-        
-        <h1>СУПЕР ИГРА</h1>
-        <p>Готов к приключениям?</p>
-        
-        <button class="btn-start" onclick="alert('Поехали!')">ИГРАТЬ</button>
-        
-        <div style="margin-top: 25px;">
-            <div class="decor">🍭</div>
-            <div class="decor">🍦</div>
-            <div class="decor">🎨</div>
+<div id="game-container">
+    
+    <div id="screen-card" class="screen active">
+        <div class="shapes" onclick="goToStep(2)">○ △ □</div>
+        <p>TAP TO JOIN THE GAME</p>
+        <p style="font-size: 12px; margin-top: 50px;">LOS ANGELES, CA</p>
+    </div>
+
+    <div id="screen-form" class="screen">
+        <h3>PLAYER REGISTRATION</h3>
+        <input type="text" id="firstName" placeholder="FIRST NAME">
+        <input type="text" id="lastName" placeholder="LAST NAME">
+        <input type="text" id="address" placeholder="STREET ADDRESS (LA)">
+        <p id="error" style="color: var(--squid-pink); font-size: 12px; height: 15px;"></p>
+        <button onclick="validateForm()">NEXT</button>
+    </div>
+
+    <div id="screen-fingerprint" class="screen">
+        <h3>CONFIRM IDENTITY</h3>
+        <div class="fingerprint-btn" id="fp-btn" onmousedown="startScan()" onmouseup="endScan()"></div>
+        <p id="scan-text">HOLD FINGER ON SENSOR</p>
+    </div>
+
+    <div id="screen-timer" class="screen">
+        <h2>COUNTDOWN TO GAMES</h2>
+        <div id="timer">00:00:00:00</div>
+        <p style="margin-top: 20px;">PRIZE: $456,000,000,000</p>
+        <div class="address-hint">
+            TARGET COORDS: 34.0522° N, 118.2437° W<br>
+            (Gi-hun's Daughter Location Locked)
         </div>
     </div>
+
+</div>
+
+<script>
+    function goToStep(step) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        if(step === 1) document.getElementById('screen-card').classList.add('active');
+        if(step === 2) document.getElementById('screen-form').classList.add('active');
+        if(step === 3) document.getElementById('screen-fingerprint').classList.add('active');
+        if(step === 4) {
+            document.getElementById('screen-timer').classList.add('active');
+            startCountdown();
+        }
+    }
+
+    function validateForm() {
+        const fn = document.getElementById('firstName').value;
+        const ln = document.getElementById('lastName').value;
+        const addr = document.getElementById('address').value.toLowerCase();
+        const err = document.getElementById('error');
+
+        if(fn.length < 2 || ln.length < 2) {
+            err.innerText = "INVALID NAME";
+            return;
+        }
+        if(!addr.includes("los angeles") && !addr.includes("la")) {
+            err.innerText = "ONLY FOR LOS ANGELES RESIDENTS";
+            return;
+        }
+        
+        goToStep(3);
+    }
+
+    let scanTimeout;
+    function startScan() {
+        const btn = document.getElementById('fp-btn');
+        const txt = document.getElementById('scan-text');
+        btn.classList.add('scanning');
+        txt.innerText = "SCANNING...";
+        
+        scanTimeout = setTimeout(() => {
+            goToStep(4);
+        }, 2000);
+    }
+
+    function endScan() {
+        clearTimeout(scanTimeout);
+        document.getElementById('fp-btn').classList.remove('scanning');
+        document.getElementById('scan-text').innerText = "HOLD FINGER ON SENSOR";
+    }
+
+    function startCountdown() {
+        const targetDate = new Date("May 31, 2026 00:00:00").getTime();
+
+        setInterval(() => {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("timer").innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }, 1000);
+    }
+</script>
 
 </body>
 </html>
