@@ -1,302 +1,214 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NNITRO 2026 | VAaD ULTIMATE SYSTEM</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQUID GAME | USA DIVISION</title>
     <style>
-        :root { --apple-bg: #ffffff; --apple-gray: #f2f2f7; --apple-blue: #007aff; --apple-border: rgba(0,0,0,0.1); }
-        * { box-sizing: border-box; font-family: -apple-system, sans-serif; transition: all 0.3s ease; }
-        body, html { margin: 0; padding: 0; background: var(--apple-bg); height: 100vh; overflow: hidden; }
-
-        /* ИНТЕРФЕЙС: ПК vs ТЕЛЕФОН */
-        #app { display: grid; height: 100vh; width: 100vw; }
-        @media (min-width: 900px) { #app { grid-template-columns: 380px 1fr; } .back-btn { display: none; } }
-        @media (max-width: 899px) { #app { grid-template-columns: 1fr; } .sidebar.hidden-mobile { display: none; } .chat-window.hidden-mobile { display: none; } }
-
-        /* SIDEBAR (МЕНЮ) */
-        .sidebar { background: #fff; border-right: 1px solid var(--apple-border); display: flex; flex-direction: column; z-index: 10; }
-        .header { height: 70px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--apple-border); font-weight: 700; font-size: 22px; }
-        .search-box { padding: 10px 15px; }
-        .search-box input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--apple-border); background: var(--apple-gray); }
-        .user-list { flex: 1; overflow-y: auto; }
-        .user-item { padding: 15px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; border-bottom: 1px solid #f9f9f9; }
-        .user-item:hover { background: var(--apple-gray); }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; }
-
-        /* CHAT WINDOW */
-        .chat-window { display: flex; flex-direction: column; position: relative; background: #fff; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-        .msg { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 15px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .msg.in { align-self: flex-start; background: var(--apple-gray); border-bottom-left-radius: 5px; }
-        .msg.out { align-self: flex-end; background: var(--apple-blue); color: #fff; border-bottom-right-radius: 5px; }
-        .input-area { padding: 20px; border-top: 1px solid var(--apple-border); display: flex; gap: 10px; align-items: center; }
-        .input-area input { flex: 1; padding: 12px; border-radius: 20px; border: none; background: var(--apple-gray); outline: none; }
-
-        /* ФИНАЛЫ: МУТАЦИЯ И ЛЕКАРСТВО */
-        #mutation-screen { position: fixed; inset: 0; z-index: 99999; display: none; background: #000; color: #fff; text-align: center; padding-top: 20vh; font-family: monospace; }
-        #horror-overlay { 
-            position: fixed; inset: 0; z-index: 99998; display: none; pointer-events: none;
-            background: url('https://www.transparenttextures.com/patterns/circuit-board.png') #001a00;
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 15% 15%, 85% 15%, 85% 85%, 15% 85%, 15% 15%);
+        :root {
+            --squid-pink: #ed1b76;
+            --card-gold: #d4af37;
+            --us-blue: #002868;
+            --us-red: #bf0a30;
         }
-        #cure-screen { position: fixed; inset: 0; background: #fff; z-index: 100000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; }
-        
-        /* АНИМАЦИИ */
-        .virus-win { filter: invert(1) hue-rotate(180deg); animation: shake 0.1s infinite; }
-        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } }
 
-        /* ЗВУКИ И ЗВОНКИ */
-        .call-ui { position: absolute; top: 80px; right: 20px; background: #fff; padding: 15px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: none; z-index: 100; }
-        .btn-call { font-size: 25px; border: none; background: none; cursor: pointer; }
+        body, html {
+            height: 100%;
+            margin: 0;
+            background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
 
-        .hidden { display: none !important; }
+        /* Глитч-эффект для текста */
+        .glitch {
+            font-size: 14px;
+            color: var(--us-red);
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+            animation: glitch 1s linear infinite;
+        }
+
+        @keyframes glitch {
+            2%, 64% { transform: translate(2px,0) skew(0deg); }
+            4%, 60% { transform: translate(-2px,0) skew(0deg); }
+            62% { transform: translate(0,0) skew(5deg); }
+        }
+
+        /* Визитка USA Edition */
+        .card {
+            background: #2a221b; /* Темное дерево/кожа */
+            width: 500px;
+            height: 280px;
+            padding: 20px;
+            border-radius: 2px;
+            box-shadow: 0 0 100px rgba(0,0,0,1), inset 0 0 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            position: relative;
+            border: 2px solid var(--card-gold);
+        }
+
+        .card::before {
+            content: "TOP SECRET // US GOVERNMENT";
+            position: absolute;
+            top: 10px;
+            font-size: 8px;
+            color: var(--card-gold);
+            opacity: 0.5;
+        }
+
+        .symbols {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .symbol {
+            border: 10px solid var(--card-gold);
+            width: 50px;
+            height: 50px;
+            filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.5));
+        }
+
+        .circle { border-radius: 50%; }
+        .triangle {
+            width: 0; height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-bottom: 55px solid var(--card-gold);
+            border-top: none;
+            background: none;
+            border-style: none none solid none;
+        }
+        .square { border-radius: 0; }
+
+        .location {
+            font-size: 1.2rem;
+            color: var(--card-gold);
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-top: 1px solid var(--card-gold);
+            padding-top: 10px;
+        }
+
+        /* Форма регистрации */
+        #form-ui {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            width: 80%;
+        }
+
+        .prize {
+            color: #4CAF50; /* Цвет денег */
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        input {
+            background: transparent;
+            border: 1px solid var(--card-gold);
+            color: #fff;
+            padding: 12px;
+            text-align: center;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .btn {
+            background: var(--us-red);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--us-blue);
+            letter-spacing: 2px;
+        }
+
+        #final-msg {
+            display: none;
+            text-align: center;
+            font-size: 2rem;
+            color: var(--us-red);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
-<div id="horror-overlay"></div>
-<div id="mutation-screen">
-    <h1 style="font-size: 100px;">:(</h1>
-    <h2>СИСТЕМА ПЕРЕЗАГРУЖАЕТСЯ...</h2>
-    <h1 id="virus-timer">23:59:59</h1>
-</div>
-<div id="cure-screen">
-    <h2 style="color: #007aff;">ИЗВИНИТЕ ЧТО ЗАСТАВЛЯЕМ ЖДАТЬ,<br>НО МЫ УНИЧТОЖАЕМ ВИРУС ЛЕКАРСТВОМ</h2>
-    <h1 id="cure-timer" style="font-size: 60px;">05:00:00</h1>
-</div>
+    <div class="glitch">Accessing US Underground Network...</div>
 
-<div id="auth-gate" style="position: fixed; inset: 0; background: #fff; z-index: 100001; display: flex; align-items: center; justify-content: center;">
-    <div style="width: 320px; text-align: center;">
-        <h1 style="font-size: 45px; letter-spacing: -3px; margin-bottom: 30px;">NNITRO</h1>
-        <div style="display: flex; margin-bottom: 20px; background: #eee; border-radius: 12px; padding: 2px;">
-            <button onclick="setAuthMode('login')" id="t-log" style="flex:1; padding:10px; border:none; border-radius:10px; background:#fff;">Войти</button>
-            <button onclick="setAuthMode('reg')" id="t-reg" style="flex:1; padding:10px; border:none; border-radius:10px; background:none;">Регистрация</button>
-        </div>
-        <input type="text" id="n-nick" placeholder="Никнейм">
-        <input type="email" id="n-mail" placeholder="E-mail (VIP: оставь пустым)">
-        <input type="password" id="n-pass" placeholder="Пароль или яшз123">
-        <button onclick="handleAuth()" style="width: 100%; padding: 15px; background: #007aff; color: #fff; border: none; border-radius: 15px; font-weight: bold; margin-top: 15px; cursor: pointer;">ВОЙТИ В СИСТЕМУ</button>
-    </div>
-</div>
-
-<div id="app" class="hidden">
-    <div class="sidebar" id="side-p">
-        <div class="header">
-            NNITRO 2026 
-            <span id="ghost-status" style="font-size: 10px; color: #aaa;"></span>
-        </div>
-        <div class="search-box">
-            <input type="text" id="user-search" placeholder="Поиск профилей..." oninput="searchUsers()">
-        </div>
-        <div class="user-list" id="u-list">
+    <div class="card" id="mainCard" onclick="openGate()">
+        <div id="visuals">
+            <div class="symbols">
+                <div class="symbol circle"></div>
+                <div class="symbol triangle"></div>
+                <div class="symbol square"></div>
             </div>
-        <div id="vaad-info" class="hidden" style="padding: 15px; background: #000; color: #0f0; font-family: monospace; font-size: 11px;">
-            <div>РЕГИСТРАЦИЙ: <span id="stat-regs">0</span></div>
-            <div>ОНЛАЙН: <span id="stat-on">0</span></div>
-            <div>ЧАТОВ: <span id="stat-chats">0</span></div>
-            <button onclick="triggerCure()" style="background: green; color: #fff; border: none; margin-top: 5px; width: 100%;">ЗАПУСТИТЬ ЛЕЧЕНИЕ</button>
-            <button onclick="roulette()" style="background: red; color: #fff; border: none; margin-top: 5px; width: 100%;">РУЛЕТКА (INFECT)</button>
+            <div class="location">New York City, NY<br>40.7128° N, 74.0060° W</div>
         </div>
+
+        <div id="form-ui">
+            <div class="prize">$456,000,000,000</div>
+            <input type="text" id="pName" placeholder="ENTER YOUR SURNAME">
+            <button class="btn" onclick="confirmIdentity(event)">ENLIST NOW</button>
+        </div>
+
+        <div id="final-msg">WE ARE WATCHING</div>
     </div>
 
-    <div class="chat-window hidden-mobile" id="chat-p">
-        <div class="header">
-            <button class="back-btn" onclick="showSidebar()">⬅️</button>
-            <span id="active-chat-name">Глобальный чат</span>
-            <button onclick="startCall()" style="background: none; border: none; font-size: 20px;">📞</button>
-        </div>
-        <div id="messages"></div>
-        <div class="call-ui" id="call-box">
-            <div style="margin-bottom: 10px;">Входящий вызов...</div>
-            <button class="btn-call" onclick="endCall()" style="color: green;">$\diamondsuit$</button> <button class="btn-call" onclick="endCall()" style="color: red;">$\ast$</button> </div>
-        <div class="input-area">
-            <button onclick="sendEmoji('👍')" style="background: none; border: none; font-size: 20px;">👍</button>
-            <input type="text" id="m-input" placeholder="Сообщение...">
-            <button onclick="sendMessage()" style="color: #007aff; background: none; border: none; font-weight: bold;">SEND</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    // --- КОНФИГУРАЦИЯ FIREBASE (Твоя база) ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyAThHqr7jix2KbL7q9kc3JJ4_dMpn09q-o",
-        authDomain: "nnitro-system.firebaseapp.com",
-        databaseURL: "https://nnitro-system-default-rtdb.firebaseio.com",
-        projectId: "nnitro-system"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    let myNick = "", myRole = "user", isInfected = false, currentTarget = "global", authMode = "login";
-
-    // --- ЛОГИКА ВХОДА ---
-    function setAuthMode(m) {
-        authMode = m;
-        document.getElementById('t-log').style.background = m === 'login' ? '#fff' : 'none';
-        document.getElementById('t-reg').style.background = m === 'reg' ? '#fff' : 'none';
-    }
-
-    function handleAuth() {
-        const nick = document.getElementById('n-nick').value.trim();
-        const pass = document.getElementById('n-pass').value;
-        const mail = document.getElementById('n-mail').value;
-
-        if (!nick || !pass) return alert("Заполни поля!");
-
-        const isVIP = (pass === "яшз123");
-        
-        if (authMode === 'reg') {
-            if (!isVIP && !mail.includes('@')) return alert("Нужен E-mail или спец-код!");
-            db.ref('users/' + nick).set({
-                online: true,
-                infected: false,
-                role: isVIP ? 'admin' : 'user',
-                mail: isVIP ? 'VIP-HIDDEN' : mail,
-                status: 'online'
-            });
-            db.ref('system/stats/totalRegs').transaction(c => (c || 0) + 1);
-            enterApp(nick, isVIP ? 'admin' : 'user');
-        } else {
-            db.ref('users/' + nick).once('value', s => {
-                if (s.exists()) enterApp(nick, s.val().role);
-                else alert("Нет такого юзера!");
-            });
-        }
-    }
-
-    function enterApp(n, r) {
-        myNick = n; myRole = r;
-        document.getElementById('auth-gate').classList.add('hidden');
-        document.getElementById('app').classList.remove('hidden');
-        if (r === 'admin') document.getElementById('vaad-info').classList.remove('hidden');
-        db.ref('users/' + n).update({ online: true, status: 'online' });
-        initSystem();
-    }
-
-    // --- СИСТЕМА ЧАТА И ЗАРАЖЕНИЯ ---
-    function sendMessage() {
-        const text = document.getElementById('m-input').value;
-        if (!text) return;
-        postMessage(text, false);
-        document.getElementById('m-input').value = "";
-    }
-
-    function sendEmoji(e) { postMessage(e, true); }
-
-    function postMessage(t, isLike) {
-        const msgData = {
-            sender: myNick,
-            text: t,
-            isLike: isLike,
-            infected: isInfected,
-            timestamp: Date.now()
-        };
-        db.ref('messages/' + currentTarget).push(msgData);
-        db.ref('system/stats/totalChats').transaction(c => (c || 0) + 1);
-        
-        // Рост вируса если отправитель заражен
-        if (isInfected) db.ref('system/virusLevel').transaction(v => (v || 0) + 1);
-    }
-
-    function initSystem() {
-        // Слушаем сообщения
-        db.ref('messages/' + currentTarget).limitToLast(50).on('value', s => {
-            const box = document.getElementById('messages');
-            box.innerHTML = "";
-            s.forEach(snap => {
-                const m = snap.val();
-                // ЛОГИКА ТИХОГО ЗАРАЖЕНИЯ
-                if (m.infected && m.sender !== myNick && myRole !== 'admin' && !isInfected) {
-                    let chance = m.isLike ? 0.3 : 1.0; // 30% если лайк, 100% если текст
-                    if (Math.random() < chance) {
-                        isInfected = true;
-                        db.ref('users/' + myNick).update({ infected: true });
-                    }
-                }
-                const cls = m.sender === myNick ? 'out' : 'in';
-                box.innerHTML += `<div class="msg ${cls}"><b>${m.sender}</b><br>${m.text}</div>`;
-            });
-            box.scrollTop = box.scrollHeight;
-        });
-
-        // Статистика (без накруток)
-        db.ref('system/stats').on('value', s => {
-            const d = s.val();
-            document.getElementById('stat-regs').innerText = d.totalRegs || 0;
-            document.getElementById('stat-chats').innerText = d.totalChats || 0;
-        });
-        db.ref('users').on('value', s => {
-            const u = s.val();
-            document.getElementById('stat-on').innerText = Object.values(u).filter(x => x.online).length;
-            renderUserList(u);
-            if (u[myNick] && u[myNick].infected) isInfected = true;
-        });
-
-        // ГОНКА: ВИРУС vs ЛЕКАРСТВО
-        db.ref('system').on('value', snap => {
-            const s = snap.val();
-            if (s.virusLevel >= 51 && s.cureLevel < 51) {
-                document.body.classList.add('virus-win');
-                document.getElementById('mutation-screen').style.display = 'block';
-                setTimeout(() => { document.getElementById('horror-overlay').style.display = 'block'; }, 5000);
+    <script>
+        function openGate() {
+            const visuals = document.getElementById('visuals');
+            const form = document.getElementById('form-ui');
+            const card = document.getElementById('mainCard');
+            
+            if(visuals.style.display !== 'none') {
+                visuals.style.display = 'none';
+                form.style.display = 'flex';
+                card.style.background = '#000';
             }
-            if (s.cureLevel >= 51) {
-                if (isInfected) {
-                    document.getElementById('cure-screen').style.display = 'flex';
-                    db.ref('users/' + myNick).update({ status: 'лечится' });
-                }
-            }
-        });
-    }
-
-    // --- МОБИЛЬНОЕ МЕНЮ ---
-    function openChat(name) {
-        currentTarget = name;
-        document.getElementById('active-chat-name').innerText = name;
-        if (window.innerWidth < 900) {
-            document.getElementById('side-p').classList.add('hidden-mobile');
-            document.getElementById('chat-p').classList.remove('hidden-mobile');
         }
-        initSystem();
-    }
 
-    function showSidebar() {
-        document.getElementById('side-p').classList.remove('hidden-mobile');
-        document.getElementById('chat-p').classList.add('hidden-mobile');
-    }
+        function confirmIdentity(e) {
+            e.stopPropagation();
+            const name = document.getElementById('pName').value;
+            if(!name) return alert("Identify yourself!");
 
-    function renderUserList(users) {
-        const list = document.getElementById('u-list');
-        list.innerHTML = `<div class="user-item" onclick="openChat('global')"><b>📢 ГЛОБАЛЬНЫЙ ЧАТ</b></div>`;
-        Object.keys(users).forEach(u => {
-            if (u === myNick) return;
-            const color = users[u].status === 'лечится' ? 'orange' : (users[u].online ? 'green' : 'gray');
-            list.innerHTML += `<div class="user-item" onclick="openChat('${u}')">
-                <div class="status-dot" style="background:${color}"></div>
-                <span>${u}</span>
-                <span style="font-size:9px; opacity:0.5;">${users[u].status}</span>
-            </div>`;
-        });
-    }
-
-    // --- АДМИН ФУНКЦИИ ---
-    function triggerCure() { db.ref('system/cureLevel').set(100); }
-    function roulette() {
-        db.ref('users').once('value', s => {
-            const keys = Object.keys(s.val());
-            const rand = keys[Math.floor(Math.random() * keys.length)];
-            db.ref('users/' + rand).update({ infected: true });
-            alert("Инфекция запущена в: " + rand);
-        });
-    }
-
-    function startCall() { document.getElementById('call-box').style.display = 'block'; }
-    function endCall() { document.getElementById('call-box').style.display = 'none'; }
-
-</script>
+            document.getElementById('form-ui').style.display = 'none';
+            document.getElementById('final-msg').style.display = 'block';
+            
+            document.body.style.background = '#bf0a30'; // Кроваво-красный фон всей страницы
+            
+            setTimeout(() => {
+                alert("Player registered. Location tracked. Wait for the black SUV.");
+                location.reload();
+            }, 2000);
+        }
+    </script>
 </body>
 </html>
