@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQUID GAME USA | SYSTEM</title>
+    <title>SQUID GAME | USA RECRUITMENT</title>
     <style>
         :root {
             --yellow: #ffcc00;
@@ -26,49 +26,48 @@
         .container {
             text-align: center;
             display: none;
-            animation: fadeIn 0.5s ease-in;
+            animation: fadeIn 0.4s ease-out;
         }
 
         .active { display: block; }
 
-        /* ЭТАП 1: ГЕОМЕТРИЧЕСКИЙ БЛОК */
+        /* ЭТАП 1: ГЕОМЕТРИЯ */
         .main-box {
-            border: 4px solid var(--yellow);
-            padding: 60px 80px;
+            border: 5px solid var(--yellow);
+            padding: 50px 70px;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 0 15px rgba(255, 204, 0, 0.2);
+            transition: 0.3s;
+            background: transparent;
         }
 
         .main-box:hover {
-            box-shadow: 0 0 30px rgba(255, 204, 0, 0.5);
+            box-shadow: 0 0 25px var(--yellow);
             background: rgba(255, 204, 0, 0.05);
         }
 
         .symbols {
-            font-size: 80px;
-            letter-spacing: 25px;
+            font-size: 70px;
+            letter-spacing: 20px;
             user-select: none;
         }
 
-        /* ЭТАП 2: МЕНЮ ИМЕНИ */
-        .input-group {
+        /* ЭТАП 2: РЕГИСТРАЦИЯ */
+        .form-box {
             border: 2px solid var(--yellow);
-            padding: 40px;
-            background: #050505;
+            padding: 30px;
+            width: 350px;
         }
 
         input {
             background: transparent;
-            border: none;
-            border-bottom: 2px solid var(--yellow);
+            border: 1px solid var(--yellow);
             color: var(--yellow);
-            font-size: 1.5rem;
-            padding: 10px;
+            font-size: 1rem;
+            padding: 12px;
             text-align: center;
             outline: none;
-            width: 300px;
-            margin-bottom: 30px;
+            width: 90%;
+            margin: 10px 0;
             text-transform: uppercase;
         }
 
@@ -76,136 +75,139 @@
             background: var(--yellow);
             color: black;
             border: none;
-            padding: 10px 40px;
+            padding: 12px 25px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 1rem;
+            margin-top: 15px;
+            width: 100%;
         }
 
-        /* ЭТАП 3: ОТПЕЧАТОК ПАЛЬЦА */
-        .fingerprint-scanner {
-            width: 150px;
-            height: 150px;
-            border: 3px solid var(--yellow);
+        /* ЭТАП 3: СКАНЕР */
+        .scanner-circle {
+            width: 130px;
+            height: 130px;
+            border: 4px dashed var(--yellow);
             border-radius: 50%;
-            margin: 0 auto;
+            margin: 20px auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 70px;
+            font-size: 60px;
             cursor: pointer;
             user-select: none;
-            position: relative;
         }
 
-        .fingerprint-scanner.scanning {
-            box-shadow: 0 0 50px var(--pink);
+        .scanning {
+            animation: pulse 1s infinite;
             border-color: var(--pink);
             color: var(--pink);
         }
 
-        /* ЭТАП 4: ТАЙМЕР */
+        /* ЭТАП 4: ТАЙМЕР И КООРДИНАТЫ */
         #timer {
-            font-size: 4.5rem;
+            font-size: 3.5rem;
             font-weight: bold;
             color: white;
-            text-shadow: 0 0 20px var(--yellow);
+            margin: 15px 0;
         }
 
-        .prize-pool {
-            font-size: 1.5rem;
+        .intel-box {
+            border-top: 1px solid #333;
             margin-top: 20px;
-            color: var(--pink);
+            padding-top: 15px;
+            font-size: 0.8rem;
+            color: #888;
+            line-height: 1.6;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        .highlight { color: var(--yellow); }
 
-        .instruction { font-size: 0.8rem; margin-top: 20px; opacity: 0.6; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div id="step1" class="container active">
-        <div class="main-box" onclick="showStep(2)">
+        <div class="main-box" onclick="next(2)">
             <div class="symbols">○ △ □</div>
         </div>
-        <p class="instruction">PRESS TO INITIALIZE</p>
+        <p style="margin-top: 20px;">SYSTEM: STANDBY</p>
     </div>
 
     <div id="step2" class="container">
-        <div class="input-group">
-            <h2>IDENTIFICATION</h2>
-            <input type="text" id="pName" placeholder="PLAYER NAME" autocomplete="off">
-            <br>
-            <button class="btn" onclick="showStep(3)">CONFIRM</button>
+        <div class="form-box">
+            <h2 style="margin-bottom: 20px;">PLAYER REGISTRATION</h2>
+            <input type="text" id="firstName" placeholder="FIRST NAME">
+            <input type="text" id="lastName" placeholder="LAST NAME">
+            <button class="btn" onclick="checkInputs()">VERIFY DATA</button>
         </div>
     </div>
 
     <div id="step3" class="container">
-        <h2>BIOMETRIC SCAN</h2>
-        <div class="fingerprint-scanner" id="scanner" onmousedown="holdStart()" onmouseup="holdEnd()" ontouchstart="holdStart()" ontouchend="holdEnd()">
+        <h2 id="verifyText">AWAITING BIOMETRICS</h2>
+        <div class="scanner-circle" id="finger" onmousedown="startScan()" onmouseup="stopScan()" ontouchstart="startScan()" ontouchend="stopScan()">
             ☝️
         </div>
-        <p class="instruction" id="scanText">HOLD TO VERIFY IDENTITY</p>
+        <p id="status">HOLD TO CONFIRM IDENTITY</p>
     </div>
 
     <div id="step4" class="container">
-        <h1 id="greet">PLAYER CONNECTED</h1>
-        <p>REMAINING TIME TO THE GAMES (NEVADA, USA):</p>
+        <h2 style="color: var(--pink);">PLAYER ACCEPTED</h2>
         <div id="timer">00:00:00:00</div>
-        <div class="prize-pool">PRIZE: $456,000,000,000</div>
+        
+        <div class="intel-box">
+            <p>LOCATION: <span class="highlight">LOS ANGELES, CA</span></p>
+            <p>TARGET COORDS: <span class="highlight">34.0522° N, 118.2437° W</span></p>
+            <p>SUBJECT: <span class="highlight">DAUGHTER OF PLAYER 456 (SEONG GA-YEON)</span></p>
+            <p>PRIZE: <span class="highlight">$456,000,000,000</span></p>
+        </div>
     </div>
 
     <script>
-        let holdTimer;
-
-        function showStep(n) {
+        let timer;
+        
+        function next(s) {
             document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-            document.getElementById('step' + n).classList.add('active');
-            
-            if (n === 4) {
-                const name = document.getElementById('pName').value || '456';
-                document.getElementById('greet').innerText = `WELCOME, PLAYER ${name}`;
-                startCountdown();
+            document.getElementById('step'+s).classList.add('active');
+        }
+
+        function checkInputs() {
+            const f = document.getElementById('firstName').value;
+            const l = document.getElementById('lastName').value;
+            if(f && l) {
+                next(3);
+                document.getElementById('verifyText').innerText = `VERIFYING: ${f} ${l}`;
+            } else {
+                alert("ERROR: PROVIDE FULL LEGAL NAME");
             }
         }
 
-        function holdStart() {
-            const scanner = document.getElementById('scanner');
-            const text = document.getElementById('scanText');
-            scanner.classList.add('scanning');
-            text.innerText = "SCANNING...";
-            
-            holdTimer = setTimeout(() => {
-                showStep(4);
-            }, 2000); // Нужно держать 2 секунды
+        function startScan() {
+            document.getElementById('finger').classList.add('scanning');
+            document.getElementById('status').innerText = "SCANNING DATABASE...";
+            timer = setTimeout(() => {
+                next(4);
+                runClock();
+            }, 2000);
         }
 
-        function holdEnd() {
-            const scanner = document.getElementById('scanner');
-            const text = document.getElementById('scanText');
-            clearTimeout(holdTimer);
-            scanner.classList.remove('scanning');
-            text.innerText = "SCAN FAILED. TRY AGAIN.";
+        function stopScan() {
+            clearTimeout(timer);
+            document.getElementById('finger').classList.remove('scanning');
+            document.getElementById('status').innerText = "HOLD TO CONFIRM IDENTITY";
         }
 
-        function startCountdown() {
+        function runClock() {
             const target = new Date("May 31, 2026 00:00:00").getTime();
-
             setInterval(() => {
                 const now = new Date().getTime();
-                const diff = target - now;
-
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-                document.getElementById("timer").innerText = 
-                    `${d}d ${h}h ${m}m ${s}s`;
+                const d = target - now;
+                const days = Math.floor(d / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((d % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((d % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((d % (1000 * 60)) / 1000);
+                document.getElementById('timer').innerText = `${days}d ${hours}h ${mins}m ${secs}s`;
             }, 1000);
         }
     </script>
