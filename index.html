@@ -1,106 +1,108 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-<style>
-  /* Общие настройки — убираем всё лишнее */
-  body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    /* Яркий анимированный фон */
-    background: linear-gradient(-45deg, #ffecd2, #fcb69f, #ff9a9e, #a1c4fd);
-    background-size: 400% 400%;
-    animation: gradientShift 15s ease infinite;
-    font-family: 'Arial Round', 'Comic Sans MS', sans-serif;
-  }
+    <meta charset="UTF-8">
+    <title>Детская Игра — Веселый Дизайн</title>
+    <style>
+        /* Общий фон — мягкий и радостный */
+        body {
+            background-color: #FFEB3B; /* Солнечный желтый */
+            background: radial-gradient(circle, #FFF9C4 0%, #FFEB3B 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-  @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
+        /* Главный контейнер (игровая карточка) */
+        .game-window {
+            background: #FFFFFF;
+            border: 8px solid #4CAF50; /* Сочная зеленая рамка */
+            border-radius: 40px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 15px 0 #388E3C, 0 25px 50px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 90%;
+        }
 
-  /* Основная карточка игры */
-  .game-panel {
-    background: white;
-    border: 10px solid #FFD700; /* Золотая рамка */
-    border-radius: 50px;
-    padding: 50px;
-    text-align: center;
-    box-shadow: 0 20px 0 #e67e22, 0 30px 50px rgba(0,0,0,0.2);
-    position: relative;
-    max-width: 500px;
-  }
+        /* Веселый заголовок */
+        h1 {
+            color: #FF5722; /* Оранжевый */
+            font-size: 42px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0px #FFCCBC;
+            letter-spacing: 2px;
+        }
 
-  /* Заголовок с радужным текстом */
-  .game-title {
-    font-size: 60px;
-    font-weight: 900;
-    margin-bottom: 30px;
-    background: linear-gradient(to bottom, #ff3019 0%, #cf0404 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(4px 4px 0px #fff) drop-shadow(6px 6px 0px #f39c12);
-    letter-spacing: 5px;
-  }
+        /* Описание */
+        p {
+            color: #555;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
 
-  /* Кнопка "Пушка" */
-  .main-button {
-    cursor: pointer;
-    background: linear-gradient(180deg, #42f54e 0%, #2ba834 100%);
-    border: none;
-    border-radius: 100px;
-    padding: 25px 60px;
-    font-size: 35px;
-    color: white;
-    font-weight: bold;
-    text-transform: uppercase;
-    box-shadow: 0 10px 0 #1b6620;
-    transition: all 0.1s;
-    position: relative;
-    outline: none;
-  }
+        /* Большая мультяшная кнопка */
+        .btn-start {
+            background: #2196F3; /* Яркий синий */
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 20px 50px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #1976D2; /* Объемная тень кнопки */
+            transition: all 0.1s;
+            text-transform: uppercase;
+        }
 
-  .main-button:hover {
-    transform: scale(1.05);
-    filter: brightness(1.1);
-  }
+        /* Эффект нажатия */
+        .btn-start:hover {
+            background: #44a6f7;
+            transform: scale(1.05);
+        }
 
-  .main-button:active {
-    transform: translateY(8px);
-    box-shadow: 0 2px 0 #1b6620;
-  }
+        .btn-start:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #1976D2;
+        }
 
-  /* Декоративные элементы (звездочки/кружочки) */
-  .star {
-    position: absolute;
-    font-size: 40px;
-    animation: spin 3s linear infinite;
-  }
+        /* Декор по бокам */
+        .decor {
+            font-size: 40px;
+            display: inline-block;
+            margin: 10px;
+            animation: bounce 2s infinite ease-in-out;
+        }
 
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-</style>
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
 </head>
 <body>
 
-  <div class="game-panel">
-    <div class="star" style="top: -30px; left: -30px;">⭐</div>
-    <div class="star" style="bottom: -30px; right: -30px;">🎨</div>
-    
-    <h1 class="game-title">ИГРАТЬ!</h1>
-    
-    <p style="font-size: 20px; color: #555; margin-bottom: 40px;">
-      <b>ЭЙ! ЖМИ СКОРЕЕ НА КНОПКУ!</b>
-    </p>
-
-    <button class="main-button">СТАРТ</button>
-  </div>
+    <div class="game-window">
+        <div class="decor">⭐</div>
+        <div class="decor">🎈</div>
+        <div class="decor">🌈</div>
+        
+        <h1>СУПЕР ИГРА</h1>
+        <p>Готов к приключениям?</p>
+        
+        <button class="btn-start" onclick="alert('Поехали!')">ИГРАТЬ</button>
+        
+        <div style="margin-top: 25px;">
+            <div class="decor">🍭</div>
+            <div class="decor">🍦</div>
+            <div class="decor">🎨</div>
+        </div>
+    </div>
 
 </body>
 </html>
