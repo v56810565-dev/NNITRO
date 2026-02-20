@@ -1,95 +1,106 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYSTEM</title>
-    <style>
-        :root { --y: #ffcc00; --d: #000; --p: #ff005a; }
-        body { background: var(--d); color: var(--y); font-family: monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-transform: uppercase; }
-        .box { display: none; text-align: center; }
-        .active { display: block; }
-        
-        /* КНОПКА С ФИГУРАМИ */
-        .rect { border: 4px solid var(--y); padding: 50px 80px; cursor: pointer; transition: 0.3s; }
-        .rect:hover { box-shadow: 0 0 20px var(--y); }
-        .shp { font-size: 80px; letter-spacing: 15px; }
+<style>
+  /* Общие настройки — убираем всё лишнее */
+  body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    /* Яркий анимированный фон */
+    background: linear-gradient(-45deg, #ffecd2, #fcb69f, #ff9a9e, #a1c4fd);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    font-family: 'Arial Round', 'Comic Sans MS', sans-serif;
+  }
 
-        /* ФОРМА */
-        input { background: transparent; border: 1px solid var(--y); color: var(--y); padding: 10px; width: 250px; margin: 10px; outline: none; text-align: center; }
-        button { background: var(--y); color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
 
-        /* СКАНЕР */
-        .scan-zone { width: 120px; height: 160px; border: 2px solid var(--y); margin: 20px auto; position: relative; cursor: pointer; border-radius: 10px; }
-        .line { width: 100%; height: 3px; background: var(--p); position: absolute; top: 0; display: none; box-shadow: 0 0 10px var(--p); }
-        
-        /* ФИНАЛ */
-        #tmr { font-size: 3.5rem; color: #fff; margin: 20px 0; }
-        .coords { font-size: 1.2rem; color: var(--y); letter-spacing: 2px; }
-    </style>
+  /* Основная карточка игры */
+  .game-panel {
+    background: white;
+    border: 10px solid #FFD700; /* Золотая рамка */
+    border-radius: 50px;
+    padding: 50px;
+    text-align: center;
+    box-shadow: 0 20px 0 #e67e22, 0 30px 50px rgba(0,0,0,0.2);
+    position: relative;
+    max-width: 500px;
+  }
+
+  /* Заголовок с радужным текстом */
+  .game-title {
+    font-size: 60px;
+    font-weight: 900;
+    margin-bottom: 30px;
+    background: linear-gradient(to bottom, #ff3019 0%, #cf0404 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(4px 4px 0px #fff) drop-shadow(6px 6px 0px #f39c12);
+    letter-spacing: 5px;
+  }
+
+  /* Кнопка "Пушка" */
+  .main-button {
+    cursor: pointer;
+    background: linear-gradient(180deg, #42f54e 0%, #2ba834 100%);
+    border: none;
+    border-radius: 100px;
+    padding: 25px 60px;
+    font-size: 35px;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 10px 0 #1b6620;
+    transition: all 0.1s;
+    position: relative;
+    outline: none;
+  }
+
+  .main-button:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+  }
+
+  .main-button:active {
+    transform: translateY(8px);
+    box-shadow: 0 2px 0 #1b6620;
+  }
+
+  /* Декоративные элементы (звездочки/кружочки) */
+  .star {
+    position: absolute;
+    font-size: 40px;
+    animation: spin 3s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+</style>
 </head>
 <body>
 
-    <div id="1" class="box active">
-        <div class="rect" onclick="move(2)">
-            <div class="shp">○ △ □</div>
-        </div>
-    </div>
+  <div class="game-panel">
+    <div class="star" style="top: -30px; left: -30px;">⭐</div>
+    <div class="star" style="bottom: -30px; right: -30px;">🎨</div>
+    
+    <h1 class="game-title">ИГРАТЬ!</h1>
+    
+    <p style="font-size: 20px; color: #555; margin-bottom: 40px;">
+      <b>ЭЙ! ЖМИ СКОРЕЕ НА КНОПКУ!</b>
+    </p>
 
-    <div id="2" class="box">
-        <div style="border: 1px solid var(--y); padding: 30px;">
-            <input type="text" id="fn" placeholder="FIRST NAME"><br>
-            <input type="text" id="ln" placeholder="LAST NAME"><br>
-            <button onclick="check()">VALIDATE</button>
-        </div>
-    </div>
+    <button class="main-button">СТАРТ</button>
+  </div>
 
-    <div id="3" class="box">
-        <h3>BIOMETRIC SCAN</h3>
-        <div class="scan-zone" id="sz" onmousedown="hold(1)" onmouseup="hold(0)" ontouchstart="hold(1)" ontouchend="hold(0)">
-            <div class="line" id="lns"></div>
-        </div>
-        <p id="st">HOLD TO VERIFY</p>
-    </div>
-
-    <div id="4" class="box">
-        <div id="tmr">00:00:00:00</div>
-        <div class="coords">34.0522° N, 118.2437° W</div>
-        <p style="color: var(--p); margin-top: 20px;">LOS ANGELES, CA</p>
-    </div>
-
-    <script>
-        let t;
-        function move(n) {
-            document.querySelectorAll('.box').forEach(b => b.classList.remove('active'));
-            document.getElementById(n).classList.add('active');
-        }
-        function check() {
-            if(document.getElementById('fn').value && document.getElementById('ln').value) move(3);
-        }
-        function hold(on) {
-            const l = document.getElementById('lns');
-            if(on) {
-                l.style.display = 'block';
-                l.style.animation = 'anim 1.5s infinite linear';
-                t = setTimeout(() => { move(4); start(); }, 2000);
-            } else {
-                clearTimeout(t);
-                l.style.display = 'none';
-            }
-        }
-        function start() {
-            const end = new Date("May 31, 2026 00:00:00").getTime();
-            setInterval(() => {
-                const d = end - new Date().getTime();
-                const days = Math.floor(d / 86400000);
-                const hrs = Math.floor((d % 86400000) / 3600000);
-                const min = Math.floor((d % 3600000) / 60000);
-                const sec = Math.floor((d % 60000) / 1000);
-                document.getElementById('tmr').innerText = `${days}d ${hrs}h ${min}m ${sec}s`;
-            }, 1000);
-        }
-    </script>
-    <style>@keyframes anim { 0% {top:0} 100% {top:100%} }</style>
 </body>
 </html>
