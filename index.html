@@ -3,212 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQUID GAME | USA DIVISION</title>
+    <title>SQUID GAME: USA EDITION</title>
     <style>
         :root {
-            --squid-pink: #ed1b76;
-            --card-gold: #d4af37;
-            --us-blue: #002868;
-            --us-red: #bf0a30;
+            --pink: #ff005a;
+            --green: #03a062;
+            --dark: #0a0a0a;
+            --gray: #1a1a1a;
         }
 
-        body, html {
-            height: 100%;
-            margin: 0;
-            background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
-            color: #fff;
+        body {
+            background-color: var(--dark);
+            color: white;
             font-family: 'Courier New', Courier, monospace;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            overflow: hidden;
-        }
-
-        /* Глитч-эффект для текста */
-        .glitch {
-            font-size: 14px;
-            color: var(--us-red);
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
             text-transform: uppercase;
-            letter-spacing: 5px;
-            margin-bottom: 20px;
-            animation: glitch 1s linear infinite;
         }
 
-        @keyframes glitch {
-            2%, 64% { transform: translate(2px,0) skew(0deg); }
-            4%, 60% { transform: translate(-2px,0) skew(0deg); }
-            62% { transform: translate(0,0) skew(5deg); }
-        }
-
-        /* Визитка USA Edition */
+        /* Визитная карточка */
         .card {
-            background: #2a221b; /* Темное дерево/кожа */
-            width: 500px;
-            height: 280px;
-            padding: 20px;
-            border-radius: 2px;
-            box-shadow: 0 0 100px rgba(0,0,0,1), inset 0 0 30px rgba(0,0,0,0.5);
+            background: #c4a484; /* Цвет картона */
+            width: 350px;
+            height: 200px;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            cursor: pointer;
-            transition: all 0.5s ease;
-            position: relative;
-            border: 2px solid var(--card-gold);
-        }
-
-        .card::before {
-            content: "TOP SECRET // US GOVERNMENT";
-            position: absolute;
-            top: 10px;
-            font-size: 8px;
-            color: var(--card-gold);
-            opacity: 0.5;
-        }
-
-        .symbols {
-            display: flex;
-            gap: 40px;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
             margin-bottom: 30px;
+            position: relative;
+            color: #222;
         }
 
-        .symbol {
-            border: 10px solid var(--card-gold);
-            width: 50px;
-            height: 50px;
-            filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.5));
-        }
-
-        .circle { border-radius: 50%; }
-        .triangle {
-            width: 0; height: 0;
-            border-left: 30px solid transparent;
-            border-right: 30px solid transparent;
-            border-bottom: 55px solid var(--card-gold);
-            border-top: none;
-            background: none;
-            border-style: none none solid none;
-        }
-        .square { border-radius: 0; }
-
-        .location {
-            font-size: 1.2rem;
-            color: var(--card-gold);
-            text-align: center;
+        .shapes {
+            font-size: 50px;
+            letter-spacing: 15px;
             font-weight: bold;
-            text-transform: uppercase;
-            border-top: 1px solid var(--card-gold);
-            padding-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Таймер */
+        .timer-container {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        #timer {
+            font-size: 3rem;
+            color: var(--pink);
+            text-shadow: 0 0 10px var(--pink);
         }
 
         /* Форма регистрации */
-        #form-ui {
-            display: none;
-            flex-direction: column;
-            gap: 15px;
-            width: 80%;
+        .registration-box {
+            background: var(--gray);
+            padding: 30px;
+            border: 2px solid var(--pink);
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
         }
 
-        .prize {
-            color: #4CAF50; /* Цвет денег */
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-        }
+        h2 { color: var(--green); margin-bottom: 20px; }
 
         input {
-            background: transparent;
-            border: 1px solid var(--card-gold);
-            color: #fff;
-            padding: 12px;
-            text-align: center;
-            font-size: 1rem;
-            outline: none;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #000;
+            border: 1px solid var(--green);
+            color: var(--green);
+            box-sizing: border-box;
         }
 
-        .btn {
-            background: var(--us-red);
-            color: white;
-            border: none;
-            padding: 15px;
-            font-weight: bold;
+        /* Кнопка отпечатка */
+        .fingerprint-btn {
+            background: none;
+            border: 2px solid var(--pink);
+            color: var(--pink);
+            padding: 20px;
+            margin-top: 20px;
             cursor: pointer;
             transition: 0.3s;
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            font-size: 40px;
         }
 
-        .btn:hover {
-            background: var(--us-blue);
-            letter-spacing: 2px;
+        .fingerprint-btn:hover {
+            background: var(--pink);
+            color: white;
+            box-shadow: 0 0 20px var(--pink);
         }
 
-        #final-msg {
-            display: none;
-            text-align: center;
-            font-size: 2rem;
-            color: var(--us-red);
-            animation: pulse 1s infinite;
+        .fingerprint-btn:active {
+            transform: scale(0.9);
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
+        .location {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #555;
         }
+
     </style>
 </head>
 <body>
 
-    <div class="glitch">Accessing US Underground Network...</div>
+    <div class="card">
+        <div class="shapes">○ △ □</div>
+        <div style="font-weight: bold; font-size: 1.2rem;">YOU ARE INVITED</div>
+    </div>
 
-    <div class="card" id="mainCard" onclick="openGate()">
-        <div id="visuals">
-            <div class="symbols">
-                <div class="symbol circle"></div>
-                <div class="symbol triangle"></div>
-                <div class="symbol square"></div>
-            </div>
-            <div class="location">New York City, NY<br>40.7128° N, 74.0060° W</div>
-        </div>
+    <div class="timer-container">
+        <p>TIME UNTIL THE GAMES BEGIN (USA):</p>
+        <div id="timer">00:00:00:00</div>
+    </div>
 
-        <div id="form-ui">
-            <div class="prize">$456,000,000,000</div>
-            <input type="text" id="pName" placeholder="ENTER YOUR SURNAME">
-            <button class="btn" onclick="confirmIdentity(event)">ENLIST NOW</button>
-        </div>
+    <div class="registration-box">
+        <h2>PLAYER JOIN</h2>
+        <input type="text" placeholder="FULL NAME" id="name">
+        <input type="number" placeholder="DEBT AMOUNT ($)" id="debt">
+        
+        <p style="font-size: 0.7rem; margin-top: 15px;">HOLD FINGERPRINT TO CONFIRM</p>
+        <button class="fingerprint-btn" onclick="register()">
+            ☝️
+        </button>
+    </div>
 
-        <div id="final-msg">WE ARE WATCHING</div>
+    <div class="location">
+        LOCATION: SECRET FACILITY, NEVADA, USA
     </div>
 
     <script>
-        function openGate() {
-            const visuals = document.getElementById('visuals');
-            const form = document.getElementById('form-ui');
-            const card = document.getElementById('mainCard');
-            
-            if(visuals.style.display !== 'none') {
-                visuals.style.display = 'none';
-                form.style.display = 'flex';
-                card.style.background = '#000';
+        // Таймер до 31 мая
+        const targetDate = new Date("May 31, 2026 00:00:00").getTime();
+
+        const countdown = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("timer").innerHTML = 
+                `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+            if (distance < 0) {
+                clearInterval(countdown);
+                document.getElementById("timer").innerHTML = "LET THE GAMES BEGIN";
+            }
+        }, 1000);
+
+        // Функция "Регистрации"
+        function register() {
+            const name = document.getElementById('name').value;
+            if(name) {
+                alert("Welcome, Player. Your identity has been verified. Wait for the black van in Nevada.");
+            } else {
+                alert("Identify yourself, Player.");
             }
         }
-
-        function confirmIdentity(e) {
-            e.stopPropagation();
-            const name = document.getElementById('pName').value;
-            if(!name) return alert("Identify yourself!");
-
-            document.getElementById('form-ui').style.display = 'none';
-            document.getElementById('final-msg').style.display = 'block';
-            
-            document.body.style.background = '#bf0a30'; // Кроваво-красный фон всей страницы
-            
-            setTimeout(() => {
-                alert("Player registered. Location tracked. Wait for the black SUV.");
-                location.reload();
-            }, 2000);
-        }
     </script>
+
 </body>
 </html>
