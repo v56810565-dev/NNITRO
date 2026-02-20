@@ -3,201 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQUID GAME: USA EDITION</title>
+    <title>SQUID GAME USA - SYSTEM ONLINE</title>
     <style>
         :root {
-            --squid-yellow: #ffdf00;
-            --squid-black: #0a0a0a;
-            --squid-pink: #ed1b76;
+            --neon-yellow: #ffdf00;
+            --deep-black: #050505;
+            --hot-pink: #ff0055;
+            --glitch-red: rgba(255, 0, 85, 0.5);
+            --glitch-blue: rgba(0, 255, 255, 0.5);
         }
 
         body {
-            background-color: var(--squid-black);
-            color: var(--squid-yellow);
-            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--deep-black);
+            color: var(--neon-yellow);
+            font-family: 'Courier New', monospace;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
             overflow: hidden;
+            text-transform: uppercase;
         }
 
-        #game-container {
-            width: 350px;
-            height: 550px;
-            border: 5px solid var(--squid-yellow);
+        /* Эффект помех на фоне */
+        body::before {
+            content: " ";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Контейнер-визитка с мерцанием */
+        #card {
+            width: 380px;
+            height: 200px;
+            border: 4px solid var(--neon-yellow);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            position: relative;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(255, 223, 0, 0.3);
-            transition: all 0.5s ease;
-        }
-
-        /* Экраны */
-        .screen { display: none; width: 100%; text-align: center; }
-        .active { display: flex; flex-direction: column; align-items: center; }
-
-        /* Фигуры на главном */
-        .shapes { font-size: 50px; margin-bottom: 30px; cursor: pointer; letter-spacing: 15px; }
-        .shapes:hover { text-shadow: 0 0 15px var(--squid-yellow); }
-
-        /* Поля ввода */
-        input {
-            background: transparent;
-            border: 1px solid var(--squid-yellow);
-            color: var(--squid-yellow);
-            padding: 10px;
-            margin: 10px 0;
-            width: 80%;
-            outline: none;
-        }
-
-        button {
-            background: var(--squid-yellow);
-            color: black;
-            border: none;
-            padding: 10px 20px;
-            font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
+            position: relative;
+            background: black;
+            animation: flicker 3s infinite;
         }
 
-        /* Сканер отпечатка */
-        .fingerprint-btn {
-            width: 80px;
-            height: 80px;
-            border: 2px solid var(--squid-yellow);
-            border-radius: 50%;
-            display: flex;
+        @keyframes flicker {
+            0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% { opacity: 1; box-shadow: 0 0 20px var(--neon-yellow); }
+            20%, 21.999%, 63%, 63.999%, 65%, 69.999% { opacity: 0.4; box-shadow: none; }
+        }
+
+        .shapes-main {
+            font-size: 70px;
+            letter-spacing: 25px;
+            text-shadow: 2px 2px var(--glitch-red), -2px -2px var(--glitch-blue);
+        }
+
+        /* Глитч-анимация для текста */
+        .glitch {
+            animation: glitch-text 2s infinite;
+        }
+
+        @keyframes glitch-text {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.98);
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            position: relative;
+            z-index: 10;
+        }
+
+        .active { display: flex; }
+
+        input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--neon-yellow);
+            color: white;
+            font-size: 24px;
+            padding: 10px;
+            text-align: center;
+            outline: none;
+            margin-bottom: 20px;
+        }
+
+        #fingerprint-zone {
+            width: 120px;
+            height: 150px;
+            border: 2px solid var(--neon-yellow);
+            border-radius: 50% 50% 20% 20%;
             margin-top: 20px;
-        }
-        .fingerprint-btn::after {
-            content: "ID";
-            font-size: 12px;
-        }
-        .scanning {
-            animation: pulse 1s infinite alternate;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
         }
 
-        @keyframes pulse {
-            from { box-shadow: 0 0 5px var(--squid-yellow); }
-            to { box-shadow: 0 0 25px var(--squid-pink); border-color: var(--squid-pink); }
+        .scan-line {
+            width: 100%;
+            height: 4px;
+            background: var(--hot-pink);
+            position: absolute;
+            top: 0;
+            box-shadow: 0 0 15px var(--hot-pink);
+            display: none;
         }
 
-        /* Таймер */
-        #timer { font-size: 30px; font-weight: bold; color: var(--squid-pink); }
-        .address-hint { font-size: 10px; margin-top: 20px; color: #555; }
+        #timer-display {
+            font-size: 50px;
+            color: var(--hot-pink);
+            font-weight: bold;
+            text-shadow: 0 0 20px var(--hot-pink);
+        }
+
+        .btn-confirm {
+            background: var(--neon-yellow);
+            padding: 15px 40px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 3px;
+        }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    
-    <div id="screen-card" class="screen active">
-        <div class="shapes" onclick="goToStep(2)">○ △ □</div>
-        <p>TAP TO JOIN THE GAME</p>
-        <p style="font-size: 12px; margin-top: 50px;">LOS ANGELES, CA</p>
+    <div id="card" onclick="playSound('start'); openMenu()">
+        <div class="shapes-main glitch">○△□</div>
+        <div style="font-size: 10px; letter-spacing: 8px;">ACCESS TERMINAL</div>
     </div>
 
-    <div id="screen-form" class="screen">
-        <h3>PLAYER REGISTRATION</h3>
-        <input type="text" id="firstName" placeholder="FIRST NAME">
-        <input type="text" id="lastName" placeholder="LAST NAME">
-        <input type="text" id="address" placeholder="STREET ADDRESS (LA)">
-        <p id="error" style="color: var(--squid-pink); font-size: 12px; height: 15px;"></p>
-        <button onclick="validateForm()">NEXT</button>
+    <div id="menu-screen" class="modal">
+        <h2 class="glitch">IDENTIFY YOURSELF</h2>
+        <input type="text" id="p-name" placeholder="NAME / SURNAME" autocomplete="off">
+        <button class="btn-confirm" onclick="playSound('click'); goToScanner()">PROCEED</button>
     </div>
 
-    <div id="screen-fingerprint" class="screen">
-        <h3>CONFIRM IDENTITY</h3>
-        <div class="fingerprint-btn" id="fp-btn" onmousedown="startScan()" onmouseup="endScan()"></div>
-        <p id="scan-text">HOLD FINGER ON SENSOR</p>
-    </div>
-
-    <div id="screen-timer" class="screen">
-        <h2>COUNTDOWN TO GAMES</h2>
-        <div id="timer">00:00:00:00</div>
-        <p style="margin-top: 20px;">PRIZE: $456,000,000,000</p>
-        <div class="address-hint">
-            TARGET COORDS: 34.0522° N, 118.2437° W<br>
-            (Gi-hun's Daughter Location Locked)
+    <div id="scanner-screen" class="modal">
+        <h2 id="welcome-msg">PLAYER</h2>
+        <p style="color: #666;">PRESS AND HOLD TO VERIFY DNA</p>
+        <div id="fingerprint-zone" onmousedown="startScanning()" onmouseup="stopScanning()" ontouchstart="startScanning()" ontouchend="stopScanning()">
+            <div class="scan-line" id="line"></div>
         </div>
     </div>
 
-</div>
+    <div id="timer-screen" class="modal">
+        <h1 class="glitch">WELCOME TO THE GAME</h1>
+        <div id="timer-display">00:00:00:00</div>
+        <div style="font-size: 25px; margin: 20px;">BANK: $456,000,000,000</div>
+        <p style="color: var(--hot-pink); font-size: 12px;">LOCATION: SECRET SECTOR USA</p>
+    </div>
 
 <script>
-    function goToStep(step) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        if(step === 1) document.getElementById('screen-card').classList.add('active');
-        if(step === 2) document.getElementById('screen-form').classList.add('active');
-        if(step === 3) document.getElementById('screen-fingerprint').classList.add('active');
-        if(step === 4) {
-            document.getElementById('screen-timer').classList.add('active');
-            startCountdown();
-        }
-    }
+    // Звуковой движок (Web Audio API)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    function validateForm() {
-        const fn = document.getElementById('firstName').value;
-        const ln = document.getElementById('lastName').value;
-        const addr = document.getElementById('address').value.toLowerCase();
-        const err = document.getElementById('error');
+    function playSound(type) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
 
-        if(fn.length < 2 || ln.length < 2) {
-            err.innerText = "INVALID NAME";
-            return;
-        }
-        if(!addr.includes("los angeles") && !addr.includes("la")) {
-            err.innerText = "ONLY FOR LOS ANGELES RESIDENTS";
-            return;
+        if (type === 'start') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        } else if (type === 'scan') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        } else if (type === 'click') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
         }
         
-        goToStep(3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
     }
 
-    let scanTimeout;
-    function startScan() {
-        const btn = document.getElementById('fp-btn');
-        const txt = document.getElementById('scan-text');
-        btn.classList.add('scanning');
-        txt.innerText = "SCANNING...";
+    function openMenu() {
+        document.getElementById('card').style.display = 'none';
+        document.getElementById('menu-screen').classList.add('active');
+    }
+
+    function goToScanner() {
+        const name = document.getElementById('p-name').value;
+        if(name.length < 2) return;
+        document.getElementById('welcome-msg').innerText = "SUBJECT: " + name;
+        document.getElementById('menu-screen').classList.remove('active');
+        document.getElementById('scanner-screen').classList.add('active');
         
-        scanTimeout = setTimeout(() => {
-            goToStep(4);
-        }, 2000);
+        // Голосовое приветствие (синтезатор)
+        const msg = new SpeechSynthesisUtterance("Player " + name + " identified. Scan your finger.");
+        msg.lang = 'en-US';
+        window.speechSynthesis.speak(msg);
     }
 
-    function endScan() {
-        clearTimeout(scanTimeout);
-        document.getElementById('fp-btn').classList.remove('scanning');
-        document.getElementById('scan-text').innerText = "HOLD FINGER ON SENSOR";
+    let scanInterval;
+    function startScanning() {
+        const line = document.getElementById('line');
+        line.style.display = 'block';
+        line.style.animation = 'scan 1s infinite alternate';
+        playSound('scan');
+        
+        scanInterval = setTimeout(() => {
+            document.getElementById('scanner-screen').classList.remove('active');
+            document.getElementById('timer-screen').classList.add('active');
+            const msg = new SpeechSynthesisUtterance("Access granted. Good luck.");
+            msg.lang = 'en-US';
+            window.speechSynthesis.speak(msg);
+            startTimer();
+        }, 2500);
     }
 
-    function startCountdown() {
-        const targetDate = new Date("May 31, 2026 00:00:00").getTime();
+    function stopScanning() {
+        document.getElementById('line').style.display = 'none';
+        clearTimeout(scanInterval);
+    }
 
+    function startTimer() {
+        const target = new Date("May 31, 2026 00:00:00").getTime();
         setInterval(() => {
             const now = new Date().getTime();
-            const distance = targetDate - now;
-
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            document.getElementById("timer").innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+            const diff = target - now;
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            document.getElementById('timer-display').innerText = `${d}D:${h}H:${m}M:${s}S`;
         }, 1000);
     }
 </script>
 
+<style>
+    @keyframes scan {
+        from { top: 0; }
+        to { top: 100%; }
+    }
+</style>
 </body>
 </html>
